@@ -10,6 +10,8 @@ const dbo = require('../db/conn')
 /////////////////////////////
 
 // This section will help you create a new record. ******************************
+
+//Add logic 
 recordRoutes.route("/record/create").post(async (req, res) => {
     try{
  let db_connect = dbo.getDb();
@@ -30,7 +32,10 @@ recordRoutes.route("/record/create").post(async (req, res) => {
     console.log("Unsername already exists") 
     return await res.status(400).json({ message: "Username already exists" })
 
- } else{
+ } 
+ 
+
+ else{
     const result = await db_connect.collection("accounts").insertOne(myobj); //otherwise it inserts into db
     console.log(" ------- inside create -------------")
     console.log("username added to database")
@@ -61,7 +66,7 @@ recordRoutes.route("/record/login").post(async (req, res) => {
  if(account){ //if its not empty ie if it exists
    console.log("successfully logged in")
    console.log(account.username, " ", account.role)
-   req.session.myID = account._id; //Create the session!
+   req.session.role = account.role; //Create the session!
    console.log("session Id is set too: " + req.session.myID)
    console.log("End of Login")
    res.send(account); //send account back to account Summary Page

@@ -70,7 +70,7 @@ export default function Create () {
       </div>
       <label>Role: </label>
       <fieldset>
-  <legend>Select a maintenance drone:</legend>
+  <legend>Select a role:</legend>
 
   <div>
     <input type="radio" id="admin" name="roleChoice" value="admin" checked />
