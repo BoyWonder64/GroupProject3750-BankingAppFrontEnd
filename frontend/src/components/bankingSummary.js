@@ -19,17 +19,19 @@ export default function BankingSummary () {
     }))
   }
 
-
   useEffect(() => {
     async function checkAuth () {
       try {
-        console.log("inside frontend check auth")
-        const response = await fetch('http://localhost:4000/record/accountSummary', {
-          method: 'GET',
-          credentials: 'include'
-        })
+        console.log('inside frontend check auth')
+        const response = await fetch(
+          'http://localhost:4000/record/accountSummary',
+          {
+            method: 'GET',
+            credentials: 'include'
+          }
+        )
         if (!response.ok) {
-          console.log("Response has failed")
+          console.log('Response has failed')
           if (response.status === 201) {
             navigate('/login')
           } else {
@@ -39,9 +41,9 @@ export default function BankingSummary () {
           return
         }
 
-        if(response.status === 201){
-          window.alert("Please login first!")
-          navigate("/login")
+        if (response.status === 201) {
+          window.alert('Please login first!')
+          navigate('/login')
         }
 
         setAuthenticated(true) //set the Auth state to True
@@ -52,11 +54,14 @@ export default function BankingSummary () {
 
     async function fetchData () {
       try {
-        console.log("inside frontend account fetch")
-        const response = await fetch('http://localhost:4000/record/accountSummary', {
-          method: 'GET',
-          credentials: 'include'
-        })
+        console.log('inside frontend account fetch')
+        const response = await fetch(
+          'http://localhost:4000/record/accountSummary',
+          {
+            method: 'GET',
+            credentials: 'include'
+          }
+        )
 
         if (!response.ok) {
           if (response.status === 200) {
@@ -67,33 +72,31 @@ export default function BankingSummary () {
           }
           return
         }
-        
-        if(response.status === 201){
-          window.alert("Please login first!")
-          navigate("/login")
-        }
 
+        if (response.status === 201) {
+          window.alert('Please login first!')
+          navigate('/login')
+        }
 
         const accountResponse = await response.json()
         setUser(accountResponse)
-
       } catch (error) {
         window.alert('Failed to fetch account information')
         console.error(error)
       }
     }
 
-
     checkAuth()
     fetchData()
   }, [navigate])
 
-
   const handleSubmit = async e => {
     e.preventDefault()
     try {
-      console.log("inside frontend Banking Summary")
-      const response = await fetch('http://localhost:4000/record/accountSummary/bankingSummary', {
+      console.log('inside frontend Banking Summary')
+      const response = await fetch(
+        'http://localhost:4000/record/accountSummary/bankingSummary',
+        {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -107,11 +110,9 @@ export default function BankingSummary () {
         const errorData = await response.json()
         throw new Error(errorData.error || 'bankingSummary failed')
       }
-        navigate('/accountSummary')
-      
-
+      navigate('/accountSummary')
     } catch (err) {
-      alert("Unable to complete transaction: " + err.message)
+      alert('Unable to complete transaction: ' + err.message)
     }
   }
 
@@ -124,32 +125,64 @@ export default function BankingSummary () {
 
   return (
     <form onSubmit={handleSubmit}>
-        <div>
-            <p>Savings: {user.savings}</p>
-            <p>Checkings: {user.checkings}</p>
-        </div>
-          <label for="transactionType">Transaction Type:</label>
-            <br></br>
-            <input type="radio" id="deposit" name="transactionType" value="deposit" required checked={form.transactionType === "deposit"} onChange={handleForm}/>
-        <label for="deposit">Deposit</label>
-        <input type="radio" id="withdraw" name="transactionType" value="withdraw"checked={form.transactionType === "withdraw"} onChange={handleForm}/>
-        <label for="withdraw">Withdrawal</label>
-        <br></br>
-        <br></br>
-        <label for="transactionType">AccountType:</label>
-        <br></br>
-        <input type="radio" id="savings" name="account" value="savings" required checked={form.account === "savings"} onChange={handleForm}/>
-        <label for="savings">Savings</label>
-        <input type="radio" id="checking" name="account" value="checking"checked={form.account === "checking"} onChange={handleForm}/>
-        <label for="checking">Checking</label>
-        <br></br>
-        <br></br>
-        <input
-          name="amount" type="number" value={form.amount} onChange={handleForm} required
+      <div>
+        <p>Savings: {user.savings}</p>
+        <p>Checkings: {user.checkings}</p>
+      </div>
+      <label for='transactionType'>Transaction Type:</label>
+      <br></br>
+      <input
+        type='radio'
+        id='deposit'
+        name='transactionType'
+        value='deposit'
+        required
+        checked={form.transactionType === 'deposit'}
+        onChange={handleForm}
       />
-      <button type='submit'>
-        Submit
-      </button>
+      <label for='deposit'>Deposit</label>
+      <input
+        type='radio'
+        id='withdraw'
+        name='transactionType'
+        value='withdraw'
+        checked={form.transactionType === 'withdraw'}
+        onChange={handleForm}
+      />
+      <label for='withdraw'>Withdrawal</label>
+      <br></br>
+      <br></br>
+      <label for='transactionType'>AccountType:</label>
+      <br></br>
+      <input
+        type='radio'
+        id='savings'
+        name='account'
+        value='savings'
+        required
+        checked={form.account === 'savings'}
+        onChange={handleForm}
+      />
+      <label for='savings'>Savings</label>
+      <input
+        type='radio'
+        id='checking'
+        name='account'
+        value='checking'
+        checked={form.account === 'checking'}
+        onChange={handleForm}
+      />
+      <label for='checking'>Checking</label>
+      <br></br>
+      <br></br>
+      <input
+        name='amount'
+        type='number'
+        value={form.amount}
+        onChange={handleForm}
+        required
+      />
+      <button type='submit'>Submit</button>
     </form>
   )
 }

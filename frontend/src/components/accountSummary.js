@@ -5,31 +5,34 @@ export default function AccountsInfo () {
   const [user, setUser] = useState(null)
   const navigate = useNavigate()
 
-  useEffect(() => { //before the page runs, do this
+  useEffect(() => {
+    //before the page runs, do this
     async function fetchData () {
       try {
-        const response = await fetch('http://localhost:4000/record/accountSummary', {
-          method: 'GET',
-          credentials: 'include'
-        })
+        const response = await fetch(
+          'http://localhost:4000/record/accountSummary',
+          {
+            method: 'GET',
+            credentials: 'include'
+          }
+        )
 
         if (!response.ok) {
           if (response.status === 200) {
-            navigate("/login")
+            navigate('/login')
           } else {
             const message = `An error occurred: ${response.statusText}`
             window.alert(message)
           }
           return
         }
-        if(response.status === 201){
-          window.alert("Please login first!")
-          navigate("/login")
+        if (response.status === 201) {
+          window.alert('Please login first!')
+          navigate('/login')
         }
 
         const accountResponse = await response.json()
         setUser(accountResponse)
-
       } catch (error) {
         window.alert('Failed to fetch account information')
         console.error(error)
@@ -38,12 +41,10 @@ export default function AccountsInfo () {
 
     fetchData()
   }, [navigate]) //before you run the page
-  
 
   if (!user) {
     return <div>Loading...</div>
   }
-
 
   return (
     <div>
