@@ -16,37 +16,65 @@ recordRoutes.route("/record/create").post(async (req, res) => {
     try{
  let db_connect = dbo.getDb();
 
+ let accountNum = 1000
+ let flag = false;
+
  let myobj = {
    username: req.body.username,
    password: req.body.password,
    role: req.body.role,
    checkings: 0,
    savings: 0,
+   accountID: accountNum
  };
 
 
- let myquery = { username: req.body.username}; //search for email from body
- const account = await db_connect.collection("records").findOne(myquery); 
- console.log("Account: " + account)
- if(account != null){
-    console.log("Unsername already exists") 
-    return await res.status(400).json({ message: "Username already exists" })
 
+
+ console.log("----Begin Body Grab----")
+ console.log(req.body.username)
+ console.log(req.body.password)
+ console.log(req.body.role)
+ console.log("----end of body grab----")
+
+
+ let myquery = { username: req.body.username}; //search for username from body
+ const account = await db_connect.collection("accounts").findOne(myquery); 
+
+
+ if(account != null){
+    console.log("Username already exists") 
+    return await res.status(400).json({ message: "Username already exists" })
  } 
- 
 
  else{
+  console.log("Inside the Else Statement")
+  let accountIDQuery = {accountID: accountNum}
+
+  while (!flag) {
+    console.log("inside the While stmt");
+
+    let accountIDQuery = { accountID: accountNum };
+    const accountIdCheck = await db_connect.collection("accounts").findOne(accountIDQuery);
+
+    if (accountIdCheck) {
+        console.log("inside the if");
+        accountNum += 1;
+        console.log(accountNum);
+    } else {
+        console.log("inside the else");
+        flag = true;
+        myobj.accountID = accountNum;
+        console.log("Added new accountID")
+        break;
+    }
+}
+
     const result = await db_connect.collection("accounts").insertOne(myobj); //otherwise it inserts into db
     console.log(" ------- inside create -------------")
     console.log("username added to database")
-    let myquery = { email: req.body.username, password: req.body.password}; 
+    let myquery = { username: req.body.username, password: req.body.password}; 
     const account = await db_connect.collection("records").findOne( myquery ); 
-    console.log(account.id)
-    console.log("session Id is set too: " + req.session.myID)
-    console.log("account _id is set too: " + account._id)
-    console.log("account id is set too: " + account.id)
-    req.session.myID = account._id;
-    console.log("session Id is set too: " + req.session.myID)
     console.log("-------------End of Create------------------")
     res.send(account); //send account back to account Summary Page
   

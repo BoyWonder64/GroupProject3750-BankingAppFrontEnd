@@ -33,7 +33,7 @@ export default function Create () {
 
       if (response.status === 400) {
         window.alert("Email Already Exists")
-        setForm({ lastName: "", firstName: "", email: "" , phone: "", password: "", });
+        setForm({ username: "", password: ""});
         navigate('/create')
       } else {
         navigate('/accountSummary')
@@ -41,7 +41,7 @@ export default function Create () {
     
     } catch (err) {
       window.alert("Accocount Creation has has failed: " + err.message)
-      setForm({ lastName: "", firstName: "", email: "" , phone: "", password: "", });
+      setForm({ username: "", password: "", role: "" });
     }
   }
 
@@ -69,24 +69,15 @@ export default function Create () {
         />
       </div>
       <label>Role: </label>
-      <fieldset>
-  <legend>Select a role:</legend>
-
-  <div>
-    <input type="radio" id="admin" name="roleChoice" value="admin" checked />
-    <label for="admin">Admin</label>
-  </div>
-
-  <div>
-    <input type="radio" id="employee" name="roleChoice" value="employee" />
-    <label for="employee">Employee</label>
-  </div>
-
-  <div>
-    <input type="radio" id="customer" name="roleChoice" value="customer" />
-    <label for="customer">Customer</label>
-  </div>
-</fieldset>
+      <label>admin, customer, or employee </label>
+      <div>
+        <input
+          name="role"
+          type="text"
+          value={form.role}
+          onChange={handleChange}
+        />
+      </div>
       <button type='submit'>Create Account</button>
     </form>
   )
