@@ -1,6 +1,7 @@
 const express = require('express')
 const recordRoutes = express.Router()
 const dbo = require('../db/conn')
+const transactions = []; //Storing all transactions inside the array
 
  
 /////////////////////////////
@@ -25,6 +26,7 @@ recordRoutes.route("/record/create").post(async (req, res) => {
    role: req.body.role,
    checkings: 0,
    savings: 0,
+   investments: 0,
    accountID: accountNum
  };
 
@@ -135,6 +137,20 @@ res.send(user);
    } catch(err) {
        throw err;
    }
+});
+
+recordRoutes.route("/record/transaction").post(async (req, res) => {
+  const { accountID, type, account, amount } = req.body; //We may need to figure out a better way to get the user information
+  const timestamp = new Date().toISOString(); //Grabs the timestamp 
+  transactions.push({ accountID, type, account, amount, timestamp }); //Push the information onto the array
+  res.status(200).json({ message: "transaction logged" })
+  })//End of Transactions
+
+
+recordRoutes.route("/record/transactionHistory").get(async (req, res) => {
+  const { accountID } = req.body; //So we need to figure out 
+  const userTransactionHistory = transactions.filter(transaction => transaction.accountID == accountID);
+  res.json(userTransactionHistory);
 });
 
 //This section will serve as the logic for the backend accountSummary **************************************
@@ -374,107 +390,8 @@ recordRoutes.route("/transfer").post(async (req, res) => {
 });
  
 
-/////////////////////////
-//  tutorial provided  //
-//                     //
-/////////////////////////
- 
-// This section will help you update a record by id.
-recordRoutes.route("/update/:id").put(async (req, res) => {
-    try{
- let db_connect = dbo.getDb();
- let myquery = { _id: new ObjectId(req.params.id) };
- let newvalues = {
-   $set: {
-     name: req.body.name,
-     position: req.body.position,
-     level: req.body.level,
-   },
- };
- const result = await db_connect.collection("records").updateOne(myquery, newvalues);
- console.log("1 document updated");
- res.json(result);
-} catch (err){
-    throw err;
-}
-});
- 
-// This section will help you delete a record
-
-recordRoutes.route("/:id").delete((req, res) => {
-    try{
-        let db_connect = dbo.getDb();
-        let myquery = { _id: new ObjectId(req.params.id) };
-        const result =  db_connect.collection("records").deleteOne(myquery);
-          console.log("1 document deleted")
-          res.json(result);
-    } catch (err){
-        throw err;
-    }
-
-});
 
 
-/////////////////////////
-//  tutorial provided  //
-//                     //
-/////////////////////////
- 
-// This section will help you get a list of all the records.
-recordRoutes.route("/record").get(async (req, res) => {
-   try{
-   console.log("In record GET route");
-let db_connect = dbo.getDb("employees");
-const result =  await db_connect.collection("records").find({}).toArray();
-console.log("Got result");
-res.json(result);
-} catch (err) {
-   throw err;
-} //end of try catch
-});
 
-
-/////////////////////////
-//  tutorial provided  //
-//                     //
-/////////////////////////
-
-// This section will help you get a single record by id
-// recordRoutes.route("/record/:id").get(async (req, res) => {
-// try {
-//     let db_connect = dbo.getDb();
-//    //  let myquery = { _id: new ObjectId(req.params.id) };
-   
-//     const result = await db_connect.collection("records").findOne(myquery);
-//     console.log(result)
-//     console.log(myquery)
-//     console.log("Got result by ID");
-//     res.json(result);
-// } catch(err){
-//     throw err;
-// }
-// });
-
-
-/////////////////////////
-//  tutorial provided  //
-//                     //
-/////////////////////////
-
-// This section will help you create a new record. ******************************
-recordRoutes.route("/record/add").post(async (req, res) => {
-  try{
-let db_connect = dbo.getDb();
-let myobj = {
- name: req.body.name,
- position: req.body.position,
- level: req.body.level,
-};
-  const result = await db_connect.collection("records").insertOne(myobj); //otherwise it inserts into db
-  res.json(result)
-  } catch(err) {
-      throw err;
-  }
-});
  
 module.exports = recordRoutes;
