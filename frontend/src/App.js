@@ -5,21 +5,23 @@ import Login from './components/login.js'
 import Logout from './components/logout.js'
 import AccountsInfo from './components/accountSummary.js'
 import BankingSummary from './components/bankingSummary.js'
+import { AuthProvider } from './auth/auth.js';
+import ProtectedRoute from './components/protectedRoute.js';
 
 const App = () => {
   return (
-    <div>
+    <AuthProvider>
       <Routes>
         <Route path='/' element={<Login />} />
-        <Route path='/create' element={<Create />} />
-        <Route path='/logout' element={<Logout />} />
-        <Route path='/account' element={<AccountsInfo />} />
-        <Route path='/summary' element={<BankingSummary />} />
+        <Route path='/create' element={<ProtectedRoute element={<Create />} role="admin" />} />
+        <Route path='/logout' element={<ProtectedRoute element={<Logout />} />} />
+        <Route path='/account' element={<ProtectedRoute element={<AccountsInfo />} />} />
+        <Route path='/summary' element={<ProtectedRoute element={<BankingSummary />} />} />
       </Routes>
-    </div>
+  </AuthProvider>
   )
 }
 
 export default App
 
-// We ned to figure out how to work with perms (admin, customers, employees)
+// We ned to figure out how to work with perms (admin, customers, employees) -- Using React Context to check

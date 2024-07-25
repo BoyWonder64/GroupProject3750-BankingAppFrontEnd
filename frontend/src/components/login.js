@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/auth.js'
 
 export default function Login(){
     const [form, setForm] = useState({
@@ -7,8 +8,9 @@ export default function Login(){
         password: ""
 
     });
-    const navigate = useNavigate();
 
+    const navigate = useNavigate();
+    const { setAuthState } = useAuth();
 
     const updateForm = e => {
         const { name, value } = e.target
@@ -31,13 +33,14 @@ export default function Login(){
         });
 
         if(response.ok)
-        { //message says its valid navigate to next page
-           navigate("/accountSummary");
+        {   // set authentication state
+            setAuthState({ isAuthenticated: true, role: DataTransfer.role });
+            //message says its valid navigate to next page
+            navigate("/accountSummary");
         } else {
             window.alert("An error occured during the login process...")
                  setForm({email: "", password: ""}); //clear the form
         }
-   
     }
 
     return(
