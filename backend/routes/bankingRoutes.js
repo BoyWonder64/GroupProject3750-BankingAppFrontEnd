@@ -58,11 +58,9 @@ recordRoutes.route("/record/create").post(async (req, res) => {
     const accountIdCheck = await db_connect.collection("accounts").findOne(accountIDQuery);
 
     if (accountIdCheck) {
-        console.log("inside the if");
         accountNum += 1;
         console.log(accountNum);
     } else {
-        console.log("inside the else");
         flag = true;
         myobj.accountID = accountNum;
         console.log("Added new accountID")
