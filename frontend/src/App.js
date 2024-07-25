@@ -1,27 +1,56 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
-import Create from './components/create.js'
-import Login from './components/login.js'
-import Logout from './components/logout.js'
-import AccountsInfo from './components/accountSummary.js'
-import BankingSummary from './components/bankingSummary.js'
-import { AuthProvider } from './auth/auth.js';
-import ProtectedRoute from './components/protectedRoute.js';
+import React, { useState, useEffect } from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import Create from './components/create';
+import Login from './components/login';
+import Logout from './components/logout';
+import AccountsInfo from './components/accountSummary';
+import BankingSummary from './components/bankingSummary';
 
 const App = () => {
+  const [authState, setAuthState] = useState({
+    isAuthenticated: false,
+    role: null,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // TESTING RETRIEVAL
+    // setAuthState({ isAuthenticated: true, role: 'admin' });
+    // setLoading(false);
+
+    fetch('/record/auth-check', {
+      credentials: 'include',
+    })
+      .then(response => response.json())
+      .then(data => {
+        setAuthState({ isAuthenticated: true, role: data.role });
+      })
+      .catch(() => {
+        setAuthState({ isAuthenticated: false, role: null });
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const renderProtectedRoute = (Component, requiredRole) => {
+    if (loading) return <div>Loading...</div>;
+
+    if (authState.isAuthenticated && (!requiredRole || authState.role === requiredRole)) {
+      return <Component />;
+    }
+    return <Navigate to="/" />;
+  };
+
   return (
-    <AuthProvider>
+    <div className="App">
       <Routes>
-        <Route path='/' element={<Login />} />
-        <Route path='/create' element={<ProtectedRoute element={<Create />} role="admin" />} />
-        <Route path='/logout' element={<ProtectedRoute element={<Logout />} />} />
-        <Route path='/account' element={<ProtectedRoute element={<AccountsInfo />} />} />
-        <Route path='/summary' element={<ProtectedRoute element={<BankingSummary />} />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/create" element={renderProtectedRoute(Create, 'admin')} />
+        <Route path="/logout" element={renderProtectedRoute(Logout)} />
+        <Route path="/account" element={renderProtectedRoute(AccountsInfo)} />
+        <Route path="/summary" element={renderProtectedRoute(BankingSummary)} />
       </Routes>
-  </AuthProvider>
-  )
-}
+    </div>
+  );
+};
 
-export default App
-
-// We ned to figure out how to work with perms (admin, customers, employees) -- Using React Context to check
+export default App;

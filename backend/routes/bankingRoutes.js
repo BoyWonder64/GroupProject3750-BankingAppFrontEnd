@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 const express = require('express')
 const recordRoutes = express.Router()
 const dbo = require('../db/conn')
@@ -417,3 +418,288 @@ recordRoutes.route("/transfer").post(async (req, res) => {
 
  
 module.exports = recordRoutes;
+=======
+const express = require('express');
+const recordRoutes = express.Router();
+const dbo = require('../db/conn');
+const { ObjectId } = require('mongodb');
+
+// Check if authenticated
+const ensureAuthenticated = (req, res, next) => {
+  if (req.session && req.session.username) {
+    return next();
+  }
+  res.status(401).json({ message: "Please login" });
+};
+
+// Check role
+const authorizeRole = (requiredRole) => (req, res, next) => {
+  if (req.session.role === requiredRole) {
+    return next();
+  }
+  res.status(403).json({ message: "Unauthorized" });
+};
+
+// This section will help you create a new record.
+recordRoutes.route("/record/create").post(ensureAuthenticated, authorizeRole('admin'), async (req, res) => {
+    try {
+        let db_connect = dbo.getDb();
+        let accountNum = 1000;
+        let flag = false;
+
+        let myobj = {
+            username: req.body.username,
+            password: req.body.password,
+            role: req.body.role,
+            checkings: 0,
+            savings: 0,
+            accountID: accountNum
+        };
+
+        console.log("----Begin Body Grab----")
+        console.log(req.body.username)
+        console.log(req.body.password)
+        console.log(req.body.role)
+        console.log("----end of body grab----")
+
+        let myquery = { username: req.body.username }; //search for username from body
+        const account = await db_connect.collection("accounts").findOne(myquery);
+
+        if (account != null) {
+            console.log("Username already exists")
+            return await res.status(400).json({ message: "Username already exists" })
+        } else {
+            console.log("Inside the Else Statement")
+            while (!flag) {
+                console.log("inside the While stmt");
+
+                let accountIDQuery = { accountID: accountNum };
+                const accountIdCheck = await db_connect.collection("accounts").findOne(accountIDQuery);
+
+                if (accountIdCheck) {
+                    accountNum += 1;
+                    console.log(accountNum);
+                } else {
+                    flag = true;
+                    myobj.accountID = accountNum;
+                    console.log("Added new accountID")
+                    break;
+                }
+            }
+
+            const result = await db_connect.collection("accounts").insertOne(myobj);
+            console.log(" ------- inside create -------------")
+            console.log("username added to database")
+            res.send(result); //send account back to account Summary Page
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// This section will perform a login.
+recordRoutes.route("/record/login").post(async (req, res) => {
+    try {
+        let db_connect = dbo.getDb();
+        let myquery = { username: req.body.username, password: req.body.password };
+        const account = await db_connect.collection("accounts").findOne(myquery);
+
+        if (account) {
+            console.log("Successfully logged in")
+            console.log(account.username, " ", account.role)
+            req.session.username = account.username;
+            req.session.role = account.role;
+            req.session.accountID = account.accountID;
+            res.json({ role: account.role });
+            console.log("session username is set to: " + req.session.username)
+        } else {
+            console.log("Unsuccessfully logged in")
+            res.status(401).json({ message: "Invalid username or password" })
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// This section will handle logout.
+recordRoutes.route("/record/logout").post((req, res) => {
+    try {
+        req.session.destroy();
+        res.send({ message: "Logged out" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to log out" });
+    }
+});
+
+// This section will serve as the logic for the backend accountSummary.
+recordRoutes.route("/record/accountSummary").get(async (req, res) => {
+    try {
+        console.log("In /accountSummary")
+        if (!req.session.accountID) {
+            return res.status(401).send({ message: 'Session Not Set!!' })
+        }
+
+        let db_connect = dbo.getDb();
+        const user = await db_connect.collection("accounts").findOne({ accountID: req.session.accountID });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        console.log("sessionID: " + req.session.accountID)
+        res.send(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+// This section will serve as the logic for the backend bankingSummary.
+recordRoutes.route("/record/accountSummary/bankingSummary").post(async (req, res) => {
+    const { transactionType, amount, account } = req.body;
+
+    try {
+        if (!req.session.accountID) {
+            return res.status(401).send({ message: 'Session Not Set!!' });
+        }
+
+        let db_connect = dbo.getDb();
+        console.log("--- Inside of Banking Summary ---")
+        console.log("session ID is set")
+        console.log("Session is: " + req.session.accountID)
+        console.log("Type is : " + transactionType)
+        console.log("account is: " + account)
+        console.log("amount is: " + amount)
+
+        const databaseAccount = await db_connect.collection("accounts").findOne({ accountID: req.session.accountID });
+
+        if (!databaseAccount) {
+            console.log("Account not found")
+            return res.status(404).send({ message: 'Account not found' });
+        }
+
+        if (transactionType === "deposit") {
+            const increaseValue = Number(amount);
+            console.log("Depositing...");
+
+            const updateField = account === "savings" ? { savings: increaseValue } : { checkings: increaseValue };
+            const result = await db_connect.collection("accounts").updateOne({ accountID: req.session.accountID }, { $inc: updateField });
+
+            res.send(result);
+            console.log("Deposit successful");
+        } else if (transactionType === "withdraw") {
+            const decreaseValue = Number(amount);
+            console.log("Withdrawing...");
+
+            if (account === "savings") {
+                if (databaseAccount.savings >= decreaseValue && decreaseValue != 0) {
+                    const newBalance = databaseAccount.savings - decreaseValue;
+                    const result = await db_connect.collection("accounts").updateOne({ accountID: req.session.accountID }, { $set: { savings: newBalance } });
+
+                    res.send(result);
+                    console.log("Withdraw successful from savings");
+                } else {
+                    res.status(400).send({ message: 'Insufficient funds in savings' });
+                }
+            } else if (account === "checkings") {
+                if (databaseAccount.checkings >= decreaseValue && decreaseValue != 0) {
+                    const newBalance = databaseAccount.checkings - decreaseValue;
+                    const result = await db_connect.collection("accounts").updateOne({ accountID: req.session.accountID }, { $set: { checkings: newBalance } });
+
+                    res.send(result);
+                    console.log("Withdraw successful from checkings");
+                } else {
+                    res.status(400).send({ message: 'Insufficient funds in checkings' });
+                }
+            } else {
+                res.status(400).send({ message: 'Invalid account type' });
+            }
+        } else {
+            res.status(400).send({ message: 'Invalid transaction type' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+// This section will display a user list.
+recordRoutes.route("/list").get(async (req, res) => {
+    try {
+        console.log("Listing specific items");
+        let db_connect = dbo.getDb();
+        const result = await db_connect.collection("accounts").find({}).project({ username: 1, role: 1, checkings: 1, savings: 1 }).toArray();
+        res.json(result);
+        console.log(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// This section will help you update a role by email.
+recordRoutes.route("/update/:email").patch(async (req, res) => {
+    try {
+        let db_connect = dbo.getDb();
+        const emailacc = req.params.email;
+        let myquery = { email: emailacc };
+        let newvalues = {
+            $set: {
+                role: req.body.role,
+            },
+        };
+        const result = await db_connect.collection("accounts").updateOne(myquery, newvalues);
+        console.log("1 document updated");
+        res.send({ message: "Role Updated" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// This section will deposit money based off the body given.
+recordRoutes.route("/deposit").patch(async (req, res) => {
+    try {
+        let db_connect = dbo.getDb();
+        const emailacc = req.body.email;
+        const savingsNewDep = req.body.savings;
+        const checkingNewDep = req.body.checkings;
+        let myquery = { email: emailacc };
+
+        const account = await db_connect.collection("accounts").findOne(myquery);
+
+        if (!account) {
+            return res.status(404).send({ message: 'Account not found' });
+        }
+
+        if (savingsNewDep > 0) {
+            const result = await db_connect.collection("accounts").updateOne(account, { $inc: { savings: savingsNewDep } });
+            res.send({ message: "Deposit successful" });
+            console.log("Balance updated for savings");
+        } else if (checkingNewDep > 0) {
+            const result = await db_connect.collection("accounts").updateOne(account, { $inc: { checkings: checkingNewDep } });
+            res.send({ message: "Deposit successful" });
+            console.log("Balance updated for checking");
+        } else {
+            res.status(400).send({ message: 'Invalid deposit amount' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// Check authentication
+recordRoutes.route("/record/auth-check").get((req, res) => {
+  if (req.session && req.session.username) {
+    res.json({ role: req.session.role });
+  } else {
+    res.status(401).json({ message: "Not authenticated" });
+  }
+});
+
+module.exports = recordRoutes;
+>>>>>>> Stashed changes
