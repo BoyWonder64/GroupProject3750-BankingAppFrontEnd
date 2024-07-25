@@ -94,8 +94,9 @@ recordRoutes.route("/record/login").post(async (req, res) => {
  if(account){ //if its not empty ie if it exists
    console.log("successfully logged in")
    console.log(account.username, " ", account.role)
-   req.session.role = account.role; //Create the session!
-   console.log("session Id is set too: " + req.session.myID)
+   req.session.accountID = account.accountID //create an accountID session
+   req.session.role = account.role; //Create the session based on the role!
+   console.log("session Id is set too: " + req.session.role)
    console.log("End of Login")
    res.send(account); //send account back to account Summary Page
  } else {
@@ -108,6 +109,27 @@ recordRoutes.route("/record/login").post(async (req, res) => {
         throw err;
     }
 });
+
+
+//This section will serve as the logic to help determine what role they have **************************************
+recordRoutes.route("/record/determineRole").get(async (req, res) => {
+  try{
+     console.log("in /determineRole")
+     let db_connect = dbo.getDb();
+     console.log("Role for user is: "+ req.session.role)
+if(!req.session.role){
+  return res.status(201).send({ message: 'Role Not Set!!' })
+}
+console.log("Role was found")
+const user = await db_connect.collection("accounts").findOne( {accountID: new ObjectId(req.session.accountID)}); 
+
+res.send(user.role);
+
+  } catch(err) {
+      throw err;
+  }
+});
+
 
 recordRoutes.route("/record/logout").post(async (req, res) => {
    try{
