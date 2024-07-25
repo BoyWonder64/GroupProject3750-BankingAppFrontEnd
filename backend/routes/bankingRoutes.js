@@ -95,8 +95,9 @@ recordRoutes.route("/record/login").post(async (req, res) => {
    console.log("successfully logged in")
    console.log(account.username, " ", account.role)
    req.session.accountID = account.accountID //create an accountID session
+   req.session.username = account.username
    req.session.role = account.role; //Create the session based on the role!
-   console.log("session Id is set too: " + req.session.role)
+   console.log("session Role is set too: " + req.session.role)
    console.log("End of Login")
    res.send(account); //send account back to account Summary Page
  } else {
@@ -413,17 +414,15 @@ recordRoutes.route("/transfer").post(async (req, res) => {
  
 // Check authentication
 recordRoutes.route("/record/auth-check").get((req, res) => {
+  console.log("Entered the auth-check route")
   if (req.session && req.session.username) {
+    console.log("Role is set too: " + req.session.role)
+    console.log("Username is set too: " + req.session.username)
     res.json({ role: req.session.role });
   } else {
     res.status(401).json({ message: "Not authenticated" });
   }
 });
-
-module.
-
-
-
 
  
 module.exports = recordRoutes;

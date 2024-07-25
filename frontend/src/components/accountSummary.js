@@ -51,8 +51,6 @@ export default function AccountsInfo () {
       <h1>Account Summary</h1>
       <p>AccountID: {user.accountID}</p>
       <p>Username: {user.username}</p>
-      <p>Email: {user.email}</p>
-      <p>Phone Number: {user.phone}</p>
     </div>
   )
 }

@@ -9,7 +9,7 @@ import BankingSummary from './components/bankingSummary';
 const App = () => {
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
-    role: null,
+    role: "",
   });
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +18,9 @@ const App = () => {
     // setAuthState({ isAuthenticated: true, role: 'admin' });
     // setLoading(false);
 
-    fetch('/record/auth-check', {
+    fetch('http://localhost:4000/record/auth-check', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
     })
       .then(response => response.json())
