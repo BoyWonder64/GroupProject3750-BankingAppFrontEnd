@@ -4,7 +4,7 @@ import { useAuth } from '../auth/auth.js'
 
 export default function Login(){
     const [form, setForm] = useState({
-        email: "",
+        username: "",
         password: ""
 
     });
@@ -39,7 +39,7 @@ export default function Login(){
             navigate("/accountSummary");
         } else {
             window.alert("An error occured during the login process...")
-                 setForm({email: "", password: ""}); //clear the form
+                 setForm({username: "", password: ""}); //clear the form
         }
     }
 
@@ -48,11 +48,11 @@ export default function Login(){
             <h3>Login</h3>
             <form onSubmit={onSubmit}>
                 <div>
-                    <label>Email: </label>
+                    <label>Username: </label>
                 <input
-                    type="email"
-                    name="email"
-                    value={form.email}
+                    type="username"
+                    name="username"
+                    value={form.username}
                     onChange={updateForm}
                 />
                 </div>
