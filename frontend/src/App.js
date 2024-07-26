@@ -1,28 +1,20 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
-import { Route, Routes } from 'react-router-dom'
-import { Navigate } from 'react-router-dom'
-import Create from './components/create.js'
-import Login from './components/login.js'
-import Logout from './components/logout.js'
-import AccountsInfo from './components/accountSummary.js'
-import BankingSummary from './components/bankingSummary.js'
-import { AuthProvider } from './auth/auth.js'
-import ProtectedRoute from './components/protectedRoute.js'
-import './index.css'
+import React, { useState, useEffect } from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import Create from './components/create';
+import Login from './components/login';
+import Logout from './components/logout';
+import AccountsInfo from './components/accountSummary';
+import BankingSummary from './components/bankingSummary';
+import "./index.css"
 
 const App = () => {
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
-    role: null
-  })
-  const [loading, setLoading] = useState(true)
+    role: "",
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TESTING RETRIEVAL
-    // setAuthState({ isAuthenticated: true, role: 'admin' });
-    // setLoading(false);
-
     fetch('http://localhost:4000/record/auth-check', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -30,49 +22,34 @@ const App = () => {
     })
       .then(response => response.json())
       .then(data => {
-        setAuthState({ isAuthenticated: true, role: data.role })
+        setAuthState({ isAuthenticated: true, role: data.role });
       })
       .catch(() => {
-        setAuthState({ isAuthenticated: false, role: null })
+        setAuthState({ isAuthenticated: false, role: null });
       })
-      .finally(() => setLoading(false))
-  }, [])
+      .finally(() => setLoading(false));
+  }, []);
 
-  const renderProtectedRoute = (Component, requiredRole) => {
-    if (loading) return <div>Loading...</div>
+  const renderProtectedRoute = (Component, requiredrole) => {
+    if (loading) return <div>Loading...</div>;
 
-    if (
-      authState.isAuthenticated &&
-      (!requiredRole || authState.role === requiredRole)
-    ) {
-      return <Component />
+    if (authState.isAuthenticated && (!requiredrole || requiredrole.includes(authState.role))) {
+      return <Component />;
     }
-    return <Navigate to='/' />
-  }
+    return <Navigate to="/" />;
+  };
 
   return (
-    <AuthProvider>
+    <div className="App">
       <Routes>
-        <Route path='/' element={<Login />} />
-        <Route
-          path='/create'
-          element={<ProtectedRoute element={<Create />} role='admin' />}
-        />
-        <Route
-          path='/logout'
-          element={<ProtectedRoute element={<Logout />} />}
-        />
-        <Route
-          path='/account'
-          element={<ProtectedRoute element={<AccountsInfo />} />}
-        />
-        <Route
-          path='/summary'
-          element={<ProtectedRoute element={<BankingSummary />} />}
-        />
+        <Route path="/" element={<Login />} />
+        <Route path="/create" element={renderProtectedRoute(Create, ['admin', 'employee'])} />
+        <Route path="/logout" element={renderProtectedRoute(Logout)} />
+        <Route path="/accountSummary" element={renderProtectedRoute(AccountsInfo)} />
+        <Route path="/bankingSummary" element={renderProtectedRoute(BankingSummary)} />
       </Routes>
-    </AuthProvider>
-  )
-}
+    </div>
+  );
+};
 
-export default App
+export default App;

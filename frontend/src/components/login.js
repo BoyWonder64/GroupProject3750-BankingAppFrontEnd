@@ -1,42 +1,46 @@
-import React, { useState } from 'react'
+import React, { useState  } from "react";
 import { useNavigate } from 'react-router-dom'
 import DarkModeToggle from './DarkModeToggle'
 
-export default function Login () {
-  const [form, setForm] = useState({
-    username: '',
-    password: ''
-  })
+export default function Login(){
+    const [form, setForm] = useState({
+        username: "",
+        password: ""
 
-  const navigate = useNavigate()
+    });
+    const navigate = useNavigate();
 
-  const updateForm = e => {
-    const { name, value } = e.target
-    setForm(prevForm => ({ ...prevForm, [name]: value }))
-  }
 
-  const onSubmit = async e => {
-    e.preventDefault()
-    try {
-      const response = await fetch('http://localhost:4000/record/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(form)
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        navigate('/accountSummary')
-      } else {
-        window.alert('Invalid username or password')
-        setForm({ username: '', password: '' })
+    const updateForm = e => {
+        const { name, value } = e.target
+        setForm(prevForm => ({...prevForm,[name]: value}))
       }
-    } catch (error) {
-      console.error('Fetch error:', error)
-      window.alert('An error occurred during the login process.')
+    
+
+     const onSubmit = async e => {
+        e.preventDefault();
+        // const newPerson = {...form};
+        const response =  await fetch("http://localhost:4000/record/login", {
+            method: "POST",
+            headers: {"Content-Type" : "application/json"},
+            credentials: 'include',
+            body: JSON.stringify(form),
+        })
+        .catch(error => {
+            window.alert(error);
+            return
+        });
+
+        if(response.ok)
+        { //message says its valid navigate to next page
+           navigate("/accountSummary")
+
+        } else {
+            window.alert("An error occured during the login process...")
+                 setForm({username: "", password: ""}); //clear the form
+        }
+   
     }
-  }
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900'>

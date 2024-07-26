@@ -10,7 +10,7 @@ export default function Logout () {
         method: 'POST',
         credentials: 'include'
       })
-      navigate('/login')
+      navigate('/')
     }
     run()
   }, [navigate])

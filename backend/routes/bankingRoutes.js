@@ -45,16 +45,13 @@ recordRoutes.route("/record/create").post(async (req, res) => {
 
 
  if(account != null){
-    console.log("Username already exists") 
     return await res.status(400).json({ message: "Username already exists" })
  } 
 
  else{
-  console.log("Inside the Else Statement")
   let accountIDQuery = {accountID: accountNum}
 
   while (!flag) {
-    console.log("inside the While stmt");
 
     let accountIDQuery = { accountID: accountNum };
     const accountIdCheck = await db_connect.collection("accounts").findOne(accountIDQuery);
@@ -88,7 +85,8 @@ recordRoutes.route("/record/create").post(async (req, res) => {
 recordRoutes.route("/record/login").post(async (req, res) => {
     try{
  let db_connect = dbo.getDb();
-
+req.session.username = null
+req.session.role = null
  let myquery = { username: req.body.username, password: req.body.password}; 
  const account = await db_connect.collection("accounts").findOne( myquery ); 
  if(account){ //if its not empty ie if it exists
@@ -102,7 +100,7 @@ recordRoutes.route("/record/login").post(async (req, res) => {
    res.send(account); //send account back to account Summary Page
  } else {
    console.log("unsuccessfully logged in")
-   res.status(200).json({ message: "unsuccessfully logged in" })
+   res.status(200).json({ message: "Not authenticated" });
 
  }
     } catch(err) {
@@ -111,10 +109,24 @@ recordRoutes.route("/record/login").post(async (req, res) => {
     }
 });
 
+// Check authentication
+recordRoutes.route("/record/auth-check").get((req, res) => {
+  console.log("Entered the auth-check route")
+  if (req.session && req.session.username) {
+    console.log("Role is set too: " + req.session.role)
+    console.log("Username is set too: " + req.session.username)
+    res.json({ role: req.session.role });
+    console.log("End of auth-check route")
+  } else {
+    res.status(401).json({ message: "Not authenticated" });
+  }
+});
+
 
 
 recordRoutes.route("/record/logout").post(async (req, res) => {
    try{
+    console.log("logged out")
       req.session.destroy()
       res.send({message: "logged out"})
    } catch(err) {
@@ -126,17 +138,14 @@ recordRoutes.route("/record/logout").post(async (req, res) => {
 //This section will serve as the logic for the backend accountSummary **************************************
 recordRoutes.route("/record/accountSummary").get(async (req, res) => {
    try{
-      console.log("in /accountSummary")
+    console.log("--- Inside account Summary ---")
       let db_connect = dbo.getDb();
-      console.log("sessionID: in accountSummary: "+ req.session.myID)
-if(!req.session.myID){
-   return res.status(201).send({ message: 'Session Not Set!!' })
-}
-console.log("sessionID was found")
-const user = await db_connect.collection("accounts").findOne( {_id: new ObjectId(req.session.myID)}); 
-
-console.log("session: "+ req.session.myID)
-res.send(user);
+    if(!req.session.username){
+      return res.status(201).send({ message: 'Session Not Set!!' })
+      }
+  console.log("sessionID was found")
+  const user = await db_connect.collection("accounts").findOne( {username: (req.session.username)}); 
+  res.send(user);
 
    } catch(err) {
        throw err;
@@ -393,17 +402,6 @@ recordRoutes.route("/transfer").post(async (req, res) => {
 }
 });
  
-// Check authentication
-recordRoutes.route("/record/auth-check").get((req, res) => {
-  console.log("Entered the auth-check route")
-  if (req.session && req.session.username) {
-    console.log("Role is set too: " + req.session.role)
-    console.log("Username is set too: " + req.session.username)
-    res.json({ role: req.session.role });
-  } else {
-    res.status(401).json({ message: "Not authenticated" });
-  }
-});
 
  
 module.exports = recordRoutes;

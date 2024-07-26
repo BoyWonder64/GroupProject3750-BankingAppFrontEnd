@@ -13,13 +13,15 @@ export default function AccountsInfo () {
           'http://localhost:4000/record/accountSummary',
           {
             method: 'GET',
-            credentials: 'include'
+            headers: {"Content-Type" : "application/json"},
+            credentials: 'include',
           }
         )
 
+
         if (!response.ok) {
           if (response.status === 200) {
-            navigate('/login')
+            navigate('/')
           } else {
             const message = `An error occurred: ${response.statusText}`
             window.alert(message)
@@ -28,7 +30,7 @@ export default function AccountsInfo () {
         }
         if (response.status === 201) {
           window.alert('Please login first!')
-          navigate('/login')
+          navigate('/')
         }
 
         const accountResponse = await response.json()
