@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Logout () {
@@ -15,5 +15,5 @@ export default function Logout () {
     run()
   }, [navigate])
 
-  return;
+  return
 }
