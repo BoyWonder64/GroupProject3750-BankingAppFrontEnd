@@ -15,5 +15,5 @@ export default function Logout () {
     run()
   }, [navigate])
 
-  return;
+  return
 }
