@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import DarkModeToggle from './DarkModeToggle'
 
 export default function Login () {
   const [form, setForm] = useState({
@@ -39,6 +40,9 @@ export default function Login () {
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900'>
+      <div>
+        <DarkModeToggle />
+      </div>
       <div className='w-full max-w-md'>
         <h3 className='text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100'>
           Login
