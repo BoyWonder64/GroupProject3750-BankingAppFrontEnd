@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export const getTransactionHistory = async (customerId) => {
-  const response = await fetch(`http://localhost:4000/record/transactionHistory`);
-  const data = await response.json();
-  return data;
-};
-
 export default function BankingSummary () {
   const [form, setForm] = useState({
     transactionType: 'deposit',
@@ -101,7 +95,7 @@ export default function BankingSummary () {
     try {
       console.log('inside frontend Banking Summary')
       const response = await fetch(
-        'http://localhost:4000/record/accountSummary/bankingSummary',
+        'http://localhost:4000/record/bankingSummary',
         {
           method: 'POST',
           headers: {
@@ -130,76 +124,85 @@ export default function BankingSummary () {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <p>Savings: {user.savings}</p>
-        <p>Checkings: {user.checkings}</p>
-        <p>Investments: {user.investments}</p>
-      </div>
-      <label for='transactionType'>Transaction Type:</label>
-      <br></br>
-      <input
-        type='radio'
-        id='deposit'
-        name='transactionType'
-        value='deposit'
-        required
-        checked={form.transactionType === 'deposit'}
-        onChange={handleForm}
-      />
-      <label for='deposit'>Deposit</label>
-      <input
-        type='radio'
-        id='withdraw'
-        name='transactionType'
-        value='withdraw'
-        checked={form.transactionType === 'withdraw'}
-        onChange={handleForm}
-      />
-      <label for='withdraw'>Withdrawal</label>
-      <br></br>
-      <br></br>
-      <label for='transactionType'>AccountType:</label>
-      <br></br>
-      <input
-        type='radio'
-        id='savings'
-        name='account'
-        value='savings'
-        required
-        checked={form.account === 'savings'}
-        onChange={handleForm}
-      />
-      <label for='savings'>Savings</label>
-      <input
-        type='radio'
-        id='checking'
-        name='account'
-        value='checking'
-        checked={form.account === 'checking'}
-        onChange={handleForm}
-      />
-      <label for='checking'>Checking</label>
-      <br></br>
-      <br></br>
-      <input
-        name='amount'
-        type='number'
-        value={form.amount}
-        onChange={handleForm}
-        required
-      />
-       <label for='investments'>Investments</label>
-      <br></br>
-      <br></br>
-      <input
-        name='amount'
-        type='number'
-        value={form.amount}
-        onChange={handleForm}
-        required
-      />
-      <button type='submit'>Submit</button>
-    </form>
-  )
+    <div>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <p>Savings: {user.savings}</p>
+          <p>Checkings: {user.checkings}</p>
+          <p>Investments: {user.investments}</p>
+        </div>
+        <label htmlFor='transactionType'>Transaction Type:</label>
+        <br />
+        <label htmlFor='deposit'>Deposit </label>
+        <input
+          type='radio'
+          id='deposit'
+          name='transactionType'
+          value='deposit'
+          required
+          checked={form.transactionType === 'deposit'}
+          onChange={handleForm}
+        />
+        <br />
+        <label htmlFor='withdraw'>Withdrawal </label>
+        <input
+          type='radio'
+          id='withdraw'
+          name='transactionType'
+          value='withdraw'
+          checked={form.transactionType === 'withdraw'}
+          onChange={handleForm}
+        />
+    
+        <br />
+        <br />
+        <label htmlFor='account'>Account Type:</label>
+        <br />
+        <label htmlFor='savings'>Savings  </label>
+        <input
+          type='radio'
+          id='savings'
+          name='account'
+          value='savings'
+          required
+          checked={form.account === 'savings'}
+          onChange={handleForm}
+        />
+            <br />
+            <label htmlFor='checkings'>Checking  </label>
+        <input
+          type='radio'
+          id='checkings'
+          name='account'
+          value='checkings'
+          checked={form.account === 'checkings'}
+          onChange={handleForm}
+        />
+        <br />
+        <label htmlFor='investments'>Investments  </label>
+        <input
+          type='radio'
+          id='investments'
+          name='account'
+          value='investments'
+          required
+          checked={form.account === 'investments'}
+          onChange={handleForm}
+        />
+        <br />
+        <br />
+
+        <input
+          name='amount'
+          type='number'
+          value={form.amount}
+          onChange={handleForm}
+          required
+        />
+        <br />
+        <br />
+        <button type='submit'>Submit</button>
+      </form>
+    </div>
+  );
 }
