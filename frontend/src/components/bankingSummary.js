@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+export const getTransactionHistory = async (customerId) => {
+  const response = await fetch(`http://localhost:4000/record/transactionHistory`);
+  const data = await response.json();
+  return data;
+};
+
 export default function BankingSummary () {
   const [form, setForm] = useState({
     transactionType: 'deposit',
@@ -128,6 +134,7 @@ export default function BankingSummary () {
       <div>
         <p>Savings: {user.savings}</p>
         <p>Checkings: {user.checkings}</p>
+        <p>Investments: {user.investments}</p>
       </div>
       <label for='transactionType'>Transaction Type:</label>
       <br></br>
@@ -173,6 +180,16 @@ export default function BankingSummary () {
         onChange={handleForm}
       />
       <label for='checking'>Checking</label>
+      <br></br>
+      <br></br>
+      <input
+        name='amount'
+        type='number'
+        value={form.amount}
+        onChange={handleForm}
+        required
+      />
+       <label for='investments'>Investments</label>
       <br></br>
       <br></br>
       <input

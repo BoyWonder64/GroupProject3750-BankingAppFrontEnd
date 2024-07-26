@@ -1,57 +1,51 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function Create () {
+export default function Create() {
   const [form, setForm] = useState({
-    username: "",
-    password: "",
-    role: ""
-  })
+    username: '',
+    password: '',
+    role: '',
+  });
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+  };
 
-  const handleChange = e => {
-    const { name, value } = e.target
-    setForm(prevForm => ({...prevForm, [name]: value
-    }))
-  }
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleSubmit = async e => {
-    e.preventDefault()
-
-    console.log('Form submitted:', form)
     try {
       const response = await fetch('http://localhost:4000/record/create', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(form)
-      })
+        body: JSON.stringify(form),
+      });
 
       if (response.status === 400) {
-        window.alert("Email Already Exists")
-        setForm({ username: "", password: ""});
-        navigate('/create')
+        window.alert('Username already exists');
+        setForm({ username: '', password: '', role: '' });
       } else {
-        navigate('/accountSummary')
+        navigate('/accountSummary');
       }
-    
     } catch (err) {
-      window.alert("Accocount Creation has has failed: " + err.message)
-      setForm({ username: "", password: "", role: "" });
+      window.alert('Account creation failed: ' + err.message);
+      setForm({ username: '', password: '', role: '' });
     }
-  }
+  };
 
   return (
-  
     <form onSubmit={handleSubmit}>
-    <h1>Account Creation</h1>
+      <h1>Account Creation</h1>
       <div>
         <label>Username:</label>
-        <br/>
+        <br />
         <input
           name="username"
           type="text"
@@ -59,17 +53,17 @@ export default function Create () {
           onChange={handleChange}
         />
       </div>
-      <label>Password: </label>
+      <label>Password:</label>
       <div>
         <input
           name="password"
-          type="text"
+          type="password"
           value={form.password}
           onChange={handleChange}
         />
       </div>
-      <label>Role: </label>
-      <label>admin, customer, or employee </label>
+      <label>Role:</label>
+      <label>admin, customer, or employee</label>
       <div>
         <input
           name="role"
@@ -78,7 +72,7 @@ export default function Create () {
           onChange={handleChange}
         />
       </div>
-      <button type='submit'>Create Account</button>
+      <button type="submit">Create Account</button>
     </form>
-  )
+  );
 }
