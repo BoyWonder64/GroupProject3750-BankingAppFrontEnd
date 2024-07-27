@@ -5,6 +5,7 @@ import Login from './components/login';
 import Logout from './components/logout';
 import AccountsInfo from './components/accountSummary';
 import BankingSummary from './components/bankingSummary';
+import EmployeeSummary from './components/employeeSummary';
 import "./index.css"
 
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="/logout" element={renderProtectedRoute(Logout)} />
         <Route path="/accountSummary" element={renderProtectedRoute(AccountsInfo)} />
         <Route path="/bankingSummary" element={renderProtectedRoute(BankingSummary)} />
+        <Route path="/employeeSummary" element={renderProtectedRoute(EmployeeSummary, ['admin', 'employee'])} />
       </Routes>
     </div>
   );
