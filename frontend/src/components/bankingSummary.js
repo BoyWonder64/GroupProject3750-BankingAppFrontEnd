@@ -203,6 +203,12 @@ export default function BankingSummary () {
         <br />
         <button type='submit'>Submit</button>
       </form>
+      <div>
+        <label>
+        Transaction History
+        </label>
+        <p>"type": "deposit", "account": "investments", "amount": "14","timestamp": "2024-07-26T22:40:20.657Z"</p>
+      </div>
     </div>
   );
 }
