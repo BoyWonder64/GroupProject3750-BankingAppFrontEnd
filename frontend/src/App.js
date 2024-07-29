@@ -6,6 +6,7 @@ import Logout from './components/logout';
 import AccountsInfo from './components/accountSummary';
 import BankingSummary from './components/bankingSummary';
 import EmployeeSummary from './components/employeeSummary';
+import AdminSummary from './components/adminSummary';
 import "./index.css"
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
         <Route path="/accountSummary" element={renderProtectedRoute(AccountsInfo)} />
         <Route path="/bankingSummary" element={renderProtectedRoute(BankingSummary)} />
         <Route path="/employeeSummary" element={renderProtectedRoute(EmployeeSummary, ['admin', 'employee'])} />
+        <Route path="/adminSummary" element={renderProtectedRoute(AdminSummary, ['admin'])} />
       </Routes>
     </div>
   );

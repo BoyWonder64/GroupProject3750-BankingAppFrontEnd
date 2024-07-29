@@ -375,7 +375,7 @@ recordRoutes.route("/record/allAccounts").get(async (req, res) => {
     try{
       console.log("Listing specific items");
       let db_connect = dbo.getDb("accounts");
-      const result =  await db_connect.collection("records").find({}).project({username:1, role:1, checkings:1, savings:1}).toArray();
+      const result =  await db_connect.collection("accounts").find({}).project({username:1, role:1, checkings:1, savings:1}).toArray();
       res.json(result);
       console.log(result)
     } catch(err) {
@@ -383,6 +383,22 @@ recordRoutes.route("/record/allAccounts").get(async (req, res) => {
         throw err;
     }
 });
+
+
+//This section will display a userlist  ************************
+recordRoutes.route("/record/allAccountsForRoles").get(async (req, res) => {
+  try{
+    console.log("Listing specific items");
+    let db_connect = dbo.getDb("accounts");
+    const result =  await db_connect.collection("accounts").find({}).project({username:1, role:1}).toArray();
+    res.json(result);
+    console.log(result)
+  } catch(err) {
+      console.log("Error fetching accounts");
+      throw err;
+  }
+});
+
 
  
 module.exports = recordRoutes;
