@@ -49,13 +49,13 @@ export default function AccountsInfo () {
   }
 
   return (
-    <div>
-      <h1>Account Summary</h1>
-      <p>AccountID: {user.accountID}</p>
-      <p>Username: {user.username}</p>
-      <p>Investments: {user.investments}</p>
-      <p>Checking: {user.checkings}</p>
-      <p>Savings: {user.savings}</p>
+    <div className='w-full max-w-md'>
+      <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100'>Account Summary</h2>
+      <p className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:shadow-outline' >AccountID: {user.accountID}</p>
+      <p className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:shadow-outline' >Username: {user.username}</p>
+      <p className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:shadow-outline' >Investments: {user.investments}</p>
+      <p className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:shadow-outline' >Checking: {user.checkings}</p>
+      <p className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:shadow-outline' >Savings: {user.savings}</p>
     </div>
   )
 }
