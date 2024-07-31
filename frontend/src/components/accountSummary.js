@@ -6,18 +6,17 @@ export default function AccountsInfo () {
   const navigate = useNavigate()
 
   useEffect(() => {
-    //before the page runs, do this
+    // Fetch account information on component mount
     async function fetchData () {
       try {
         const response = await fetch(
           'http://localhost:4000/record/accountSummary',
           {
             method: 'GET',
-            headers: {"Content-Type" : "application/json"},
-            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
           }
         )
-
 
         if (!response.ok) {
           if (response.status === 200) {
@@ -45,17 +44,38 @@ export default function AccountsInfo () {
   }, [navigate]) //before you run the page
 
   if (!user) {
-    return <div>Loading...</div>
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        Loading...
+      </div>
+    )
   }
 
   return (
-    <div>
-      <h1>Account Summary</h1>
-      <p>AccountID: {user.accountID}</p>
-      <p>Username: {user.username}</p>
-      <p>Investments: {user.investments}</p>
-      <p>Checking: {user.checkings}</p>
-      <p>Savings: {user.savings}</p>
+    <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4'>
+      <div className='w-full max-w-2xl bg-white dark:bg-gray-800 shadow-md rounded-lg p-8'>
+        <h1 className='text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100'>
+          Account Summary
+        </h1>
+        <div className='mb-4'>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>AccountID:</span> {user.accountID}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>Username:</span> {user.username}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>Investments:</span>{' '}
+            {user.investments}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>Checking:</span> {user.checkings}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>Savings:</span> {user.savings}
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
