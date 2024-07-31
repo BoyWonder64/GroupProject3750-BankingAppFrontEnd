@@ -375,7 +375,7 @@ recordRoutes.route("/record/allAccounts").get(async (req, res) => {
     try{
       console.log("Listing specific items");
       let db_connect = dbo.getDb("accounts");
-      const result =  await db_connect.collection("accounts").find({}).project({username:1, role:1, checkings:1, savings:1}).toArray();
+      const result =  await db_connect.collection("accounts").find({}).project({accountID:1, username:1, role:1, checkings:1, savings:1}).toArray();
       res.json(result);
       console.log(result)
     } catch(err) {
@@ -385,19 +385,35 @@ recordRoutes.route("/record/allAccounts").get(async (req, res) => {
 });
 
 
+
 //This section will display a userlist  ************************
-recordRoutes.route("/record/allAccountsForRoles").get(async (req, res) => {
-  try{
-    console.log("Listing specific items");
+recordRoutes.route("/record/changeRole/:selectedAccountID").put(async (req, res) => {
+  try {
+    console.log("Entered Change Role");
+    console.log("New Role Wanted: " + req.body.role);
+    console.log("Selected User ID: " + req.params.selectedAccountID);
+    const selectedID = parseInt(req.params.selectedAccountID);
     let db_connect = dbo.getDb("accounts");
-    const result =  await db_connect.collection("accounts").find({}).project({username:1, role:1}).toArray();
-    res.json(result);
-    console.log(result)
-  } catch(err) {
+    
+    let myquery = { accountID: selectedID }; 
+    const account = await db_connect.collection("accounts").findOne( myquery ); 
+    if(account){
+      console.log("Found account!")
+      const updateResult = await db_connect.collection("accounts").updateOne(
+        { accountID: selectedID },
+        { $set: { role: req.body.role } }
+        );
+        res.status(200).json({ message: 'Role updated successfully.' });
+       } else {
+        console.log("Didnt work")
+        res.status(404).json({ message: 'Unable to update role - Backend.' });
+       }
+   } catch(err) {
       console.log("Error fetching accounts");
       throw err;
   }
 });
+
 
 
  

@@ -102,13 +102,15 @@ export default function EmployeeSummary () {
         <h2 className='text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100'>
           View and Manage Customer Accounts
         </h2>
-        <ul className='mb-6 text-gray-700 dark:text-gray-300'>
+        <h2 className='mb-6 text-gray-700 dark:text-gray-300'>
           {accounts.map(account => (
-            <li key={account.accountID} className='mb-2'>
-              Account ID: {account.accountID}, Username: {account.username}
-            </li>
+            <h1 key={account.accountID} className='mb-2'>
+              Account ID: {account.accountID} 
+              <br></br> 
+              Username: {account.username}
+            </h1>
           ))}
-        </ul>
+        </h2>
         <div className='mb-6'>
           <h2 className='text-xl font-bold mb-4 text-gray-900 dark:text-gray-100'>
             Deposit or Withdraw Money
