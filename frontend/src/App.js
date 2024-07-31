@@ -40,7 +40,12 @@ const App = () => {
     }
     return <Navigate to="/" />;
   };
-
+//todo: Add styling - Winston
+//Still needing styling:
+//accountSummary
+//bankingSummary
+//employeeSummary
+//adminSummary
   return (
     <div className="App">
       <Routes>
@@ -49,8 +54,8 @@ const App = () => {
         <Route path="/logout" element={renderProtectedRoute(Logout)} />
         <Route path="/accountSummary" element={renderProtectedRoute(AccountsInfo)} />
         <Route path="/bankingSummary" element={renderProtectedRoute(BankingSummary)} />
-        <Route path="/employeeSummary" element={renderProtectedRoute(EmployeeSummary, ['admin', 'employee'])} />
-        <Route path="/adminSummary" element={renderProtectedRoute(AdminSummary, ['admin'])} />
+        <Route path="/employeeSummary" element={renderProtectedRoute(EmployeeSummary, ['admin', 'employee'])} /> 
+        <Route path="/adminSummary" element={renderProtectedRoute(AdminSummary, ['admin'])} /> 
       </Routes>
     </div>
   );
