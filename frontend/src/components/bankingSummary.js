@@ -46,7 +46,7 @@ export default function BankingSummary () {
           navigate('/login')
         }
 
-        setAuthenticated(true) //set the Auth state to True
+        setAuthenticated(true) // set the Auth state to True
       } catch (err) {
         navigate('/login')
       }
@@ -117,98 +117,149 @@ export default function BankingSummary () {
   }
 
   if (!authenticated) {
-    return <div>Loading...</div>
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        Loading...
+      </div>
+    )
   }
   if (!user) {
-    return <div>Loading...</div>
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        Loading...
+      </div>
+    )
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <p>Savings: {user.savings}</p>
-          <p>Checkings: {user.checkings}</p>
-          <p>Investments: {user.investments}</p>
+    <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4'>
+      <form
+        onSubmit={handleSubmit}
+        className='w-full max-w-lg bg-white dark:bg-gray-800 shadow-md rounded-lg p-8'
+      >
+        <div className='mb-6'>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>Savings:</span> {user.savings}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>Checkings:</span> {user.checkings}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <span className='font-semibold'>Investments:</span>{' '}
+            {user.investments}
+          </p>
         </div>
-        <label htmlFor='transactionType'>Transaction Type:</label>
-        <br />
-        <label htmlFor='deposit'>Deposit </label>
-        <input
-          type='radio'
-          id='deposit'
-          name='transactionType'
-          value='deposit'
-          required
-          checked={form.transactionType === 'deposit'}
-          onChange={handleForm}
-        />
-        <br />
-        <label htmlFor='withdraw'>Withdrawal </label>
-        <input
-          type='radio'
-          id='withdraw'
-          name='transactionType'
-          value='withdraw'
-          checked={form.transactionType === 'withdraw'}
-          onChange={handleForm}
-        />
-    
-        <br />
-        <br />
-        <label htmlFor='account'>Account Type:</label>
-        <br />
-        <label htmlFor='savings'>Savings  </label>
-        <input
-          type='radio'
-          id='savings'
-          name='account'
-          value='savings'
-          required
-          checked={form.account === 'savings'}
-          onChange={handleForm}
-        />
-            <br />
-            <label htmlFor='checkings'>Checking  </label>
-        <input
-          type='radio'
-          id='checkings'
-          name='account'
-          value='checkings'
-          checked={form.account === 'checkings'}
-          onChange={handleForm}
-        />
-        <br />
-        <label htmlFor='investments'>Investments  </label>
-        <input
-          type='radio'
-          id='investments'
-          name='account'
-          value='investments'
-          required
-          checked={form.account === 'investments'}
-          onChange={handleForm}
-        />
-        <br />
-        <br />
-
-        <input
-          name='amount'
-          type='number'
-          value={form.amount}
-          onChange={handleForm}
-          required
-        />
-        <br />
-        <br />
-        <button type='submit'>Submit</button>
+        <div className='mb-4'>
+          <label
+            htmlFor='transactionType'
+            className='block text-gray-700 dark:text-gray-300 font-bold mb-2'
+          >
+            Transaction Type:
+          </label>
+          <label className='block'>
+            <input
+              type='radio'
+              id='deposit'
+              name='transactionType'
+              value='deposit'
+              required
+              checked={form.transactionType === 'deposit'}
+              onChange={handleForm}
+              className='mr-2'
+            />
+            Deposit
+          </label>
+          <label className='block'>
+            <input
+              type='radio'
+              id='withdraw'
+              name='transactionType'
+              value='withdraw'
+              checked={form.transactionType === 'withdraw'}
+              onChange={handleForm}
+              className='mr-2'
+            />
+            Withdrawal
+          </label>
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='account'
+            className='block text-gray-700 dark:text-gray-300 font-bold mb-2'
+          >
+            Account Type:
+          </label>
+          <label className='block'>
+            <input
+              type='radio'
+              id='savings'
+              name='account'
+              value='savings'
+              required
+              checked={form.account === 'savings'}
+              onChange={handleForm}
+              className='mr-2'
+            />
+            Savings
+          </label>
+          <label className='block'>
+            <input
+              type='radio'
+              id='checkings'
+              name='account'
+              value='checkings'
+              checked={form.account === 'checkings'}
+              onChange={handleForm}
+              className='mr-2'
+            />
+            Checking
+          </label>
+          <label className='block'>
+            <input
+              type='radio'
+              id='investments'
+              name='account'
+              value='investments'
+              required
+              checked={form.account === 'investments'}
+              onChange={handleForm}
+              className='mr-2'
+            />
+            Investments
+          </label>
+        </div>
+        <div className='mb-6'>
+          <label
+            htmlFor='amount'
+            className='block text-gray-700 dark:text-gray-300 font-bold mb-2'
+          >
+            Amount:
+          </label>
+          <input
+            name='amount'
+            type='number'
+            value={form.amount}
+            onChange={handleForm}
+            required
+            className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:shadow-outline'
+          />
+        </div>
+        <button
+          type='submit'
+          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
+        >
+          Submit
+        </button>
       </form>
-      <div>
-        <label>
-        Transaction History
+      <div className='mt-8 w-full max-w-lg bg-white dark:bg-gray-800 shadow-md rounded-lg p-8'>
+        <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
+          Transaction History
         </label>
-        <p>"type": "deposit", "account": "investments", "amount": "14","timestamp": "2024-07-26T22:40:20.657Z"</p>
+        <p className='text-gray-700 dark:text-gray-300'>
+          "type": "deposit", "account": "investments", "amount":
+          "14","timestamp": "2024-07-26T22:40:20.657Z"
+        </p>
       </div>
     </div>
-  );
+  )
 }

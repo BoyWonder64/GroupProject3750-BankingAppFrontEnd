@@ -1,50 +1,50 @@
 // Can view any account associated with a bank customer ID
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-export default function EmployeeSummary() {
-  const [accounts, setAccounts] = useState([]);
-  const [selectedAccountID, setSelectedAccountID] = useState('');
-  const [amount, setAmount] = useState('');
-  const [accountType, setAccountType] = useState('savings'); // Default to savings
-  const [targetAccountID, setTargetAccountID] = useState('');
-  const [targetAccountType, setTargetAccountType] = useState('savings'); // Default to savings
-  const navigate = useNavigate();
+export default function EmployeeSummary () {
+  const [accounts, setAccounts] = useState([])
+  const [selectedAccountID, setSelectedAccountID] = useState('')
+  const [amount, setAmount] = useState('')
+  const [accountType, setAccountType] = useState('savings') // Default to savings
+  const [targetAccountID, setTargetAccountID] = useState('')
+  const [targetAccountType, setTargetAccountType] = useState('savings') // Default to savings
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Get accounts
-    async function fetchAccounts() {
+    async function fetchAccounts () {
       try {
-        const response = await fetch('http://localhost:4000/record/allAccounts', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        });
+        const response = await fetch(
+          'http://localhost:4000/record/allAccounts',
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+          }
+        )
 
         if (response.ok) {
-          const accountsData = await response.json();
-          setAccounts(accountsData);
-        } 
-        else {
+          const accountsData = await response.json()
+          setAccounts(accountsData)
+        } else {
           if (response.status === 401) {
-            navigate('/');
-          } 
-          else {
-            window.alert('Failed to fetch accounts.');
+            navigate('/')
+          } else {
+            window.alert('Failed to fetch accounts.')
           }
         }
-      } 
-      catch (error) {
-        window.alert('Failed to fetch accounts.');
-        console.error(error);
+      } catch (error) {
+        window.alert('Failed to fetch accounts.')
+        console.error(error)
       }
     }
 
-    fetchAccounts();
-  }, [navigate]);
+    fetchAccounts()
+  }, [navigate])
 
   // Deposit/Withdraw
-  const handleTransaction = async (transactionType) => {
+  const handleTransaction = async transactionType => {
     try {
       const response = await fetch('http://localhost:4000/record/transaction', {
         method: 'POST',
@@ -54,20 +54,20 @@ export default function EmployeeSummary() {
           accountID: selectedAccountID,
           transactionType,
           accountType,
-          amount: parseFloat(amount),
-        }),
-      });
+          amount: parseFloat(amount)
+        })
+      })
 
       if (response.ok) {
-        window.alert('Transaction successful');
+        window.alert('Transaction successful')
       } else {
-        window.alert('Transaction failed.');
+        window.alert('Transaction failed.')
       }
     } catch (error) {
-      window.alert('Transaction failed.');
-      console.log("Transaction error");
+      window.alert('Transaction failed.')
+      console.log('Transaction error')
     }
-  };
+  }
 
   // Transfer between users
   const handleTransfer = async () => {
@@ -81,93 +81,116 @@ export default function EmployeeSummary() {
           fromAccountType: accountType,
           toAccountID: targetAccountID,
           toAccountType: targetAccountType,
-          amount: parseFloat(amount),
-        }),
-      });
+          amount: parseFloat(amount)
+        })
+      })
 
       if (response.ok) {
-        window.alert('Transfer successful');
+        window.alert('Transfer successful')
       } else {
-        window.alert('Transfer failed.');
+        window.alert('Transfer failed.')
       }
     } catch (error) {
-      window.alert('Transfer failed.');
-      console.error(error);
+      window.alert('Transfer failed.')
+      console.error(error)
     }
-  };
+  }
 
   return (
-    <div>
-      <div>
-        <h2>View and Manage Customer Accounts</h2>
-        <ul>
+    <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4'>
+      <div className='w-full max-w-2xl bg-white dark:bg-gray-800 shadow-md rounded-lg p-8'>
+        <h2 className='text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100'>
+          View and Manage Customer Accounts
+        </h2>
+        <ul className='mb-6 text-gray-700 dark:text-gray-300'>
           {accounts.map(account => (
-            <li key={account.accountID}>
+            <li key={account.accountID} className='mb-2'>
               Account ID: {account.accountID}, Username: {account.username}
             </li>
           ))}
         </ul>
-      </div>
-      <div>
-        <h2>Deposit or Withdraw Money</h2>
-        <label>
+        <div className='mb-6'>
+          <h2 className='text-xl font-bold mb-4 text-gray-900 dark:text-gray-100'>
+            Deposit or Withdraw Money
+          </h2>
+          <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
             Account ID:
-          <input
-            type="text"
-            value={selectedAccountID}
-            onChange={e => setSelectedAccountID(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Account Type:
-          <select
-            value={accountType}
-            onChange={e => setAccountType(e.target.value)}
+            <input
+              type='text'
+              value={selectedAccountID}
+              onChange={e => setSelectedAccountID(e.target.value)}
+              className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
+            />
+          </label>
+          <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
+            Account Type:
+            <select
+              value={accountType}
+              onChange={e => setAccountType(e.target.value)}
+              className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
+            >
+              <option value='savings'>Savings</option>
+              <option value='checking'>Checking</option>
+              <option value='investments'>Investments</option>
+            </select>
+          </label>
+          <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
+            Amount:
+            <input
+              type='text'
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
+            />
+          </label>
+          <div className='flex space-x-4 mt-4'>
+            <button
+              onClick={() => handleTransaction('deposit')}
+              className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
+            >
+              Deposit
+            </button>
+            <button
+              onClick={() => handleTransaction('withdraw')}
+              className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
+            >
+              Withdraw
+            </button>
+          </div>
+        </div>
+        <div>
+          <h2 className='text-xl font-bold mb-4 text-gray-900 dark:text-gray-100'>
+            Transfer Money
+          </h2>
+          <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
+            Target Account ID:
+            <input
+              type='text'
+              value={targetAccountID}
+              onChange={e => setTargetAccountID(e.target.value)}
+              className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
+            />
+          </label>
+          <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
+            Target Account Type:
+            <select
+              value={targetAccountType}
+              onChange={e => setTargetAccountType(e.target.value)}
+              className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
+            >
+              <option value='savings'>Savings</option>
+              <option value='checking'>Checking</option>
+              <option value='investments'>Investments</option>
+            </select>
+          </label>
+          <button
+            onClick={handleTransfer}
+            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4'
           >
-            <option value="savings">Savings</option>
-            <option value="checking">Checking</option>
-            <option value="investments">Investments</option>
-          </select>
-        </label>
-        <br />
-        <label>
-          Amount:
-          <input
-            type="text"
-            value={amount}
-            onChange={e => setAmount(e.target.value)}
-          />
-        </label>
-        <br />
-        <button onClick={() => handleTransaction('deposit')}>Deposit</button>
-        <button onClick={() => handleTransaction('withdraw')}>Withdraw</button>
-      </div>
-      <div>
-        <h2>Transfer Money</h2>
-        <label>
-          Target Account ID:
-          <input
-            type="text"
-            value={targetAccountID}
-            onChange={e => setTargetAccountID(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Target Account Type:
-          <select
-            value={targetAccountType}
-            onChange={e => setTargetAccountType(e.target.value)}
-          >
-            <option value="savings">Savings</option>
-            <option value="checking">Checking</option>
-            <option value="investments">Investments</option>
-          </select>
-        </label>
-        <br />
-        <button onClick={handleTransfer}>Transfer</button>
+            Transfer
+          </button>
+        </div>
       </div>
     </div>
-  );
+  )
 }
