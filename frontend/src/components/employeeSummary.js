@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 export default function EmployeeSummary () {
   const [accounts, setAccounts] = useState([])
   const [selectedAccountID, setSelectedAccountID] = useState('')
+  const [singleSelectedAccountID, setSingleSelectedAccountID] = useState('')
   const [amount, setAmount] = useState('')
   const [accountType, setAccountType] = useState('savings') // Default to savings
   const [targetAccountID, setTargetAccountID] = useState('')
@@ -51,7 +52,7 @@ export default function EmployeeSummary () {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          accountID: Number(selectedAccountID),
+          accountID: Number(singleSelectedAccountID),
           transactionType,
           accountType,
           amount: parseFloat(amount)
@@ -119,8 +120,8 @@ export default function EmployeeSummary () {
             Account ID:
             <input
               type='text'
-              value={selectedAccountID}
-              onChange={e => setSelectedAccountID(e.target.value)}
+              value={singleSelectedAccountID}
+              onChange={e => setSingleSelectedAccountID(e.target.value)}
               className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
             />
           </label>
@@ -165,11 +166,29 @@ export default function EmployeeSummary () {
             Transfer Money
           </h2>
           <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
-            Target Account ID:
+            From: Account ID
+            <input
+              type='text'
+              value={selectedAccountID}
+              onChange={e => setSelectedAccountID(e.target.value)}
+              className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
+            />
+          </label>
+          <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
+            To: Account ID
             <input
               type='text'
               value={targetAccountID}
               onChange={e => setTargetAccountID(e.target.value)}
+              className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
+            />
+          </label>
+          <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
+            Amount:
+            <input
+              type='text'
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
               className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
             />
           </label>

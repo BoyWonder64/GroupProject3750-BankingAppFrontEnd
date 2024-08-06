@@ -1,8 +1,7 @@
 const express = require('express')
 const recordRoutes = express.Router()
 const dbo = require('../db/conn')
-const transactions = []; //Storing all transactions inside the array
-
+const hasher  = require('crypto');
  
 /////////////////////////////
 //                         //
@@ -17,12 +16,15 @@ recordRoutes.route("/record/create").post(async (req, res) => {
     try{
  let db_connect = dbo.getDb();
 
- let accountNum = 1000
+ let accountNum = 1000 //Starting account num
  let flag = false;
+ const {password} = req.body;
+
+ const hashPassword = hasher.createHash('sha256').update(password).digest('hex'); //collect the password from the body and hash it
 
  let myobj = {
    username: req.body.username,
-   password: req.body.password,
+   password: hashPassword, //Setting the password as the hashPassword now
    role: req.body.role,
    checkings: 0,
    savings: 0,
@@ -32,11 +34,8 @@ recordRoutes.route("/record/create").post(async (req, res) => {
  };
 
 
-
-
  console.log("----Begin Body Grab----")
  console.log(req.body.username)
- console.log(req.body.password)
  console.log(req.body.role)
  console.log("----end of body grab----")
 
@@ -50,7 +49,6 @@ recordRoutes.route("/record/create").post(async (req, res) => {
  } 
 
  else{
-  let accountIDQuery = {accountID: accountNum}
 
   while (!flag) {
 
@@ -84,13 +82,24 @@ recordRoutes.route("/record/create").post(async (req, res) => {
 
 //This section will sorta perform a login message **************************************
 recordRoutes.route("/record/login").post(async (req, res) => {
-    try{
- let db_connect = dbo.getDb();
-req.session.username = null
-req.session.role = null
- let myquery = { username: req.body.username, password: req.body.password}; 
- const account = await db_connect.collection("accounts").findOne( myquery ); 
- if(account){ //if its not empty ie if it exists
+  try{
+
+    let db_connect = dbo.getDb();
+    req.session.username = null
+    req.session.role = null
+
+    const {password} = req.body; //Collect the password from the screen
+    const hashedPassword = hasher.createHash('sha256').update(password).digest('hex'); //hash the collected password
+
+    let myquery = { username: req.body.username}; 
+    const account = await db_connect.collection("accounts").findOne( myquery ); 
+
+ if(account.password !== hashedPassword){ //if the password isnt the same
+  console.log("unsuccessfully logged in")
+  return res.status(200).send({ message: 'Invalid username or password' });
+ }
+
+ if(account.password == hashedPassword){ //if its not empty ie if it exists
    console.log("successfully logged in")
    console.log(account.username, " ", account.role)
    req.session.accountID = account.accountID //create an accountID session
@@ -218,7 +227,7 @@ recordRoutes.route("/record/transfer").post(async (req, res) => {
   const db_connect = dbo.getDb();
   const parsedToAccountID = Number(toAccountID); // Ensure accountID is a number
   const parsedFromAccountID = Number(fromAccountID); // Ensure accountID is a number
-  const parsedAmount = parseFloat(amount);
+  const parsedAmount = Number(amount);
 
   try {
       const fromAccount = await db_connect.collection("accounts").findOne({ accountID: parsedFromAccountID });
@@ -231,7 +240,7 @@ recordRoutes.route("/record/transfer").post(async (req, res) => {
       }
 
       // Checks if enough money is in from account
-      if (fromAccount[fromAccountType] < parseFloat(amount)) {
+      if (fromAccount[fromAccountType] < Number(amount)) {
           console.log("Not enough in source account");
           return res.status(400).json({ message: "Not enough in source account" });
       }
@@ -239,11 +248,11 @@ recordRoutes.route("/record/transfer").post(async (req, res) => {
       // Update account balances
       await db_connect.collection("accounts").updateOne(
           { parsedFromAccountID },
-          { $inc: { [fromAccountType]: -parseFloat(amount) } }
+          { $inc: { [fromAccountType]: -Number(amount) } }
       );
       await db_connect.collection("accounts").updateOne(
           { parsedToAccountID },
-          { $inc: { [toAccountType]: parseFloat(amount) } }
+          { $inc: { [toAccountType]: Number(amount) } }
       );
 
       // Update transaction arrays
