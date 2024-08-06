@@ -51,7 +51,7 @@ export default function EmployeeSummary () {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          accountID: selectedAccountID,
+          accountID: Number(selectedAccountID),
           transactionType,
           accountType,
           amount: parseFloat(amount)
@@ -77,7 +77,7 @@ export default function EmployeeSummary () {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          fromAccountID: selectedAccountID,
+          fromAccountID: Number(selectedAccountID),
           fromAccountType: accountType,
           toAccountID: targetAccountID,
           toAccountType: targetAccountType,
