@@ -255,10 +255,16 @@ export default function BankingSummary () {
         <label className='block text-gray-700 dark:text-gray-300 font-bold mb-2'>
           Transaction History
         </label>
-        <p className='text-gray-700 dark:text-gray-300'>
-          "type": "deposit", "account": "investments", "amount":
-          "14","timestamp": "2024-07-26T22:40:20.657Z"
-        </p>
+        <ul className='mb-6'>
+          {user.transactionHistory && user.transactionHistory.length > 0 ? ( //if the length is greater than zero, display history - otherwise display "No Transactions Found"
+            user.transactionHistory.map((transaction, index) => (
+              <li key={index} className='text-gray-700 dark:text-gray-300 mb-2'>
+               Time: {transaction.timestamp} Type: {transaction.type} of ${transaction.amount} to {transaction.account}
+              </li>
+            ))) : (
+            <li className='text-gray-700 dark:text-gray-300'>No Transactions Found</li>
+          )}
+        </ul>
       </div>
     </div>
   )
