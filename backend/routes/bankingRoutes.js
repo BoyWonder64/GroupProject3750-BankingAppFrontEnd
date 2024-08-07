@@ -162,16 +162,17 @@ recordRoutes.route("/record/accountSummary").get(async (req, res) => {
    }
 });
 
-// Handles deposits and withdrawals
-recordRoutes.route("/record/transaction").post(async (req, res) => {
-  const { accountID, transactionType, accountType, amount } = req.body; //We may need to figure out a better way to get the user information
-  const timestamp = new Date().toISOString(); //Grabs the timestamp 
+// Handles deposits and withdrawals on the employeeSummary page
+recordRoutes.route("/record/employeeSummary").post(async (req, res) => {
+  const { accountID, transactionType, accountType, amount } = req.body; 
   const db_connect = dbo.getDb();
   const parsedAccountID = Number(accountID); // Ensure accountID is a number
   const parsedAmount = parseFloat(amount);
 
+  req.session.accountid = accountID
+
   try {
-    const account = await db_connect.collection("accounts").findOne({ accountID });
+    const account = await db_connect.collection("accounts").findOne({ accountID: parsedAccountID });
 
     // Log the request details
     console.log("Received transaction request:");
@@ -181,55 +182,100 @@ recordRoutes.route("/record/transaction").post(async (req, res) => {
     console.log("Amount:", parsedAmount);
 
     if (!account) {
-        return res.status(404).json({ message: "Account not found" });
+      return res.status(404).json({ message: "Account not found" });
     }
 
     let updatedValue;
 
-    if (transactionType === 'deposit') {
-        updatedValue = { $inc: { [accountType]: parseFloat(parsedAmount) } };
-    } 
-    else if (transactionType === 'withdraw') {
-        // Checks if account has enough for withdrawal amount
-        if (account[accountType] >= parseFloat(amount)) {
-            updatedValue = { $inc: { [accountType]: -parseFloat(parsedAmount) } };
-        } 
-        else {
-            console.log("Need mo' money");
-            return res.status(400).json({ message: "Need mo' money" });
+    if (transactionType === "deposit") {
+      const increaseValue = Number(amount);
+
+      if (accountType === "savings") {
+        updatedValue = await db_connect.collection("accounts").updateOne(
+          { accountID: parsedAccountID},
+          { $inc: { savings: increaseValue } }
+        );
+      } else if (accountType === "checkings"){
+        updatedValue = await db_connect.collection("accounts").updateOne(
+          { accountID: parsedAccountID },
+          { $inc: { checkings: increaseValue } }
+        );
+      }
+      else if (accountType === "investments") {
+        updatedValue = await db_connect.collection("accounts").updateOne(
+          { accountID: parsedAccountID },
+          { $inc: { investments: increaseValue } }
+        );
+      }
+    } //end of Deposit
+
+    else if (transactionType === "withdraw") {
+      let decreaseValue = Number(amount);
+
+      if (accountType === "savings") {
+        if (account.savings >= decreaseValue) {
+          updatedValue = await db_connect.collection("accounts").updateOne(
+            { accountID: parsedAccountID },
+            { $set: { savings: account.savings - decreaseValue } }
+          );
+        } else {
+          return res.status(400).send({ message: 'Insufficient funds in savings' });
         }
-    } 
-    else {
-        return res.status(400).json({ message: "Transaction Failed" });
+      } else if (accountType === "checkings") {
+        if (account.checkings >= decreaseValue) {
+          updatedValue = await db_connect.collection("accounts").updateOne(
+            { accountID: parsedAccountID },
+            { $set: { checkings: account.checkings - decreaseValue } }
+          );
+        } else {
+          return res.status(400).send({ message: 'Insufficient funds in checkings' });
+        }
+      } else if (accountType === "investments") {
+        if (account.investments >= decreaseValue) {
+          updatedValue = await db_connect.collection("accounts").updateOne(
+            { accountID: parsedAccountID},
+            { $set: { investments: account.investments - decreaseValue } }
+          );
+        } else {
+          return res.status(400).send({ message: 'Insufficient funds in investments' });
+        }
+      }
+    } else {
+      return res.status(400).send({ message: 'Invalid transaction type' });
     }
-
-    await db_connect.collection("accounts").updateOne(
-        { parsedAccountID },
-        updatedValue
-    );
-
-    // Update transaciton array
-    await db_connect.collection("accounts").updateOne(
-        { parsedAccountID },
-        { $push: { transactionHistory: { type: transactionType, account: accountType, parsedAmount, timestamp: new Date().toISOString() } } }
+  
+    const logTransaction = await db_connect.collection("accounts").updateOne(
+      { accountID: parsedAccountID },
+      {
+        $push: {
+          transactionHistory: {
+            type: transactionType,
+            account: accountType,
+            amount: parsedAmount,
+            timestamp: new Date().toISOString()
+          }
+        }
+      }
     );
 
     res.status(200).json({ message: "Transaction logged" });
-} catch (err) {
+  } catch (err) {
     console.log("Transaction error");
     res.status(500).json({ message: "Transaction Error" });
-}
+  }
 });
 
 // Handles transferring money between users
 recordRoutes.route("/record/transfer").post(async (req, res) => {
-  const { fromAccountID, fromAccountType, toAccountID, toAccountType, amount } = req.body;
+  const { fromAccountID, fromAccountType, toAccountID, toAccountType, transferAmount } = req.body;
   const db_connect = dbo.getDb();
   const parsedToAccountID = Number(toAccountID); // Ensure accountID is a number
   const parsedFromAccountID = Number(fromAccountID); // Ensure accountID is a number
   const parsedAmount = Number(amount);
 
   try {
+    console.log("Inside transfer")
+
       const fromAccount = await db_connect.collection("accounts").findOne({ accountID: parsedFromAccountID });
       const toAccount = await db_connect.collection("accounts").findOne({ accountID: parsedToAccountID });
 
@@ -255,15 +301,19 @@ recordRoutes.route("/record/transfer").post(async (req, res) => {
           { $inc: { [toAccountType]: Number(amount) } }
       );
 
-      // Update transaction arrays
-      await db_connect.collection("accounts").updateOne(
-          { parsedFromAccountID },
-          { $push: { transactionHistory: { type: 'transfer', parsedFromAccountID, parsedToAccountID, parsedAmount, timestamp: new Date().toISOString() } } }
-      );
-      await db_connect.collection("accounts").updateOne(
-          {parsedToAccountID },
-          { $push: { transactionHistory: { type: 'transfer', parsedFromAccountID, parsedToAccountID, parsedAmount, timestamp: new Date().toISOString() } } }
-      );
+      // const logTransaction = await db_connect.collection("accounts").updateOne(
+      //   { accountID: parsedAccountID },
+      //   {
+      //     $push: {
+      //       transactionHistory: {
+      //         type: transactionType,
+      //         account: account,
+      //         amount: amount,
+      //         timestamp: new Date().toISOString()
+      //       }
+      //     }
+      //   }
+      // );
 
       res.status(200).json({ message: "Transfer successful" });
   } catch (err) {

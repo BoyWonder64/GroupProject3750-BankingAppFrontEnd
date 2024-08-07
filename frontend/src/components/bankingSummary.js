@@ -1,134 +1,134 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function BankingSummary () {
+export default function BankingSummary() {
   const [form, setForm] = useState({
     transactionType: 'deposit',
     amount: 0,
-    account: 'savings'
-  })
-  const [authenticated, setAuthenticated] = useState(false)
-  const navigate = useNavigate()
-  const [user, setUser] = useState(null)
+    account: 'savings',
+  });
+  const [authenticated, setAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
-  const handleForm = e => {
-    const { name, value } = e.target
-    setForm(prevForm => ({
+  const handleForm = (e) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({
       ...prevForm,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   useEffect(() => {
-    async function checkAuth () {
+    async function checkAuth() {
       try {
-        console.log('inside frontend check auth')
+        console.log('inside frontend check auth');
         const response = await fetch(
           'http://localhost:4000/record/accountSummary',
           {
             method: 'GET',
-            credentials: 'include'
+            credentials: 'include',
           }
-        )
+        );
         if (!response.ok) {
-          console.log('Response has failed')
+          console.log('Response has failed');
           if (response.status === 201) {
-            navigate('/login')
+            navigate('/login');
           } else {
-            const message = `An error occurred: ${response.statusText}`
-            window.alert(message)
+            const message = `An error occurred: ${response.statusText}`;
+            window.alert(message);
           }
-          return
+          return;
         }
 
         if (response.status === 201) {
-          window.alert('Please login first!')
-          navigate('/login')
+          window.alert('Please login first!');
+          navigate('/login');
         }
 
-        setAuthenticated(true) // set the Auth state to True
+        setAuthenticated(true); // set the Auth state to True
       } catch (err) {
-        navigate('/login')
+        navigate('/login');
       }
     }
 
-    async function fetchData () {
+    async function fetchData() {
       try {
-        console.log('inside frontend account fetch')
+        console.log('inside frontend account fetch');
         const response = await fetch(
           'http://localhost:4000/record/accountSummary',
           {
             method: 'GET',
-            credentials: 'include'
+            credentials: 'include',
           }
-        )
+        );
 
         if (!response.ok) {
           if (response.status === 200) {
-            navigate('/login')
+            navigate('/login');
           } else {
-            const message = `An error occurred: ${response.statusText}`
-            window.alert(message)
+            const message = `An error occurred: ${response.statusText}`;
+            window.alert(message);
           }
-          return
+          return;
         }
 
         if (response.status === 201) {
-          window.alert('Please login first!')
-          navigate('/login')
+          window.alert('Please login first!');
+          navigate('/login');
         }
 
-        const accountResponse = await response.json()
-        setUser(accountResponse)
+        const accountResponse = await response.json();
+        setUser(accountResponse);
       } catch (error) {
-        window.alert('Failed to fetch account information')
-        console.error(error)
+        window.alert('Failed to fetch account information');
+        console.error(error);
       }
     }
 
-    checkAuth()
-    fetchData()
-  }, [navigate])
+    checkAuth();
+    fetchData();
+  }, [navigate]);
 
-  const handleSubmit = async e => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      console.log('inside frontend Banking Summary')
+      console.log('inside frontend Banking Summary');
       const response = await fetch(
         'http://localhost:4000/record/bankingSummary',
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify(form)
+          body: JSON.stringify(form),
         }
-      )
+      );
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'bankingSummary failed')
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'bankingSummary failed');
       }
-      navigate('/accountSummary')
+      navigate('/accountSummary');
     } catch (err) {
-      alert('Unable to complete transaction: ' + err.message)
+      alert('Unable to complete transaction: ' + err.message);
     }
-  }
+  };
 
   if (!authenticated) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
         Loading...
       </div>
-    )
+    );
   }
   if (!user) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
         Loading...
       </div>
-    )
+    );
   }
 
   return (
@@ -145,8 +145,7 @@ export default function BankingSummary () {
             <span className='font-semibold'>Checkings:</span> {user.checkings}
           </p>
           <p className='text-gray-700 dark:text-gray-300'>
-            <span className='font-semibold'>Investments:</span>{' '}
-            {user.investments}
+            <span className='font-semibold'>Investments:</span> {user.investments}
           </p>
         </div>
         <div className='mb-4'>
@@ -256,16 +255,17 @@ export default function BankingSummary () {
           Transaction History
         </label>
         <ul className='mb-6'>
-          {user.transactionHistory && user.transactionHistory.length > 0 ? ( //if the length is greater than zero, display history - otherwise display "No Transactions Found"
-            user.transactionHistory.map((transaction, index) => (
+          {user.transactionHistory && user.transactionHistory.length > 0 ? (
+            user.transactionHistory.map((transaction, index) => ( //List out each 
               <li key={index} className='text-gray-700 dark:text-gray-300 mb-2'>
-               Time: {transaction.timestamp} Type: {transaction.type} of ${transaction.amount} to {transaction.account}
+                Time: {transaction.timestamp} Type: {transaction.type} of ${transaction.amount} to {transaction.account}
               </li>
-            ))) : (
+            ))
+          ) : (
             <li className='text-gray-700 dark:text-gray-300'>No Transactions Found</li>
           )}
         </ul>
       </div>
     </div>
-  )
+  );
 }

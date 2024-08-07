@@ -7,6 +7,7 @@ export default function EmployeeSummary () {
   const [selectedAccountID, setSelectedAccountID] = useState('')
   const [singleSelectedAccountID, setSingleSelectedAccountID] = useState('')
   const [amount, setAmount] = useState('')
+  const [transferAmount, setTransferAmount] = useState('')
   const [accountType, setAccountType] = useState('savings') // Default to savings
   const [targetAccountID, setTargetAccountID] = useState('')
   const [targetAccountType, setTargetAccountType] = useState('savings') // Default to savings
@@ -47,7 +48,7 @@ export default function EmployeeSummary () {
   // Deposit/Withdraw
   const handleTransaction = async transactionType => {
     try {
-      const response = await fetch('http://localhost:4000/record/transaction', {
+      const response = await fetch('http://localhost:4000/record/employeeSummary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -55,7 +56,7 @@ export default function EmployeeSummary () {
           accountID: Number(singleSelectedAccountID),
           transactionType,
           accountType,
-          amount: parseFloat(amount)
+          amount: Number(amount)
         })
       })
 
@@ -82,7 +83,7 @@ export default function EmployeeSummary () {
           fromAccountType: accountType,
           toAccountID: targetAccountID,
           toAccountType: targetAccountType,
-          amount: parseFloat(amount)
+          transferAmount: Number(transferAmount)
         })
       })
 
@@ -187,8 +188,8 @@ export default function EmployeeSummary () {
             Amount:
             <input
               type='text'
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
+              value={transferAmount}
+              onChange={e => setTransferAmount(e.target.value)}
               className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
             />
           </label>
