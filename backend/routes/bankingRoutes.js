@@ -265,64 +265,76 @@ recordRoutes.route("/record/employeeSummary").post(async (req, res) => {
   }
 });
 
-// Handles transferring money between users
 recordRoutes.route("/record/transfer").post(async (req, res) => {
   const { fromAccountID, fromAccountType, toAccountID, toAccountType, transferAmount } = req.body;
   const db_connect = dbo.getDb();
   const parsedToAccountID = Number(toAccountID); // Ensure accountID is a number
   const parsedFromAccountID = Number(fromAccountID); // Ensure accountID is a number
-  const parsedAmount = Number(amount);
+  const parsedAmount = Number(transferAmount);
 
   try {
-    console.log("Inside transfer")
+    console.log("Inside transfer");
 
-      const fromAccount = await db_connect.collection("accounts").findOne({ accountID: parsedFromAccountID });
-      const toAccount = await db_connect.collection("accounts").findOne({ accountID: parsedToAccountID });
+    const fromAccount = await db_connect.collection("accounts").findOne({ accountID: parsedFromAccountID });
+    const toAccount = await db_connect.collection("accounts").findOne({ accountID: parsedToAccountID });
 
-      // Checks if both accounts exist
-      if (!fromAccount || !toAccount) {
-          console.log
-          return res.status(404).json({ message: "Account not found" });
+    // Check if both accounts exist
+    if (!fromAccount || !toAccount) {
+      console.log("Account not found");
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    // Check if enough money is in the source account
+    if (fromAccount[fromAccountType] < parsedAmount) {
+      console.log("Not enough in source account");
+      return res.status(400).json({ message: "Not enough in source account" });
+    }
+
+    // Update account balances
+    await db_connect.collection("accounts").updateOne(
+      { accountID: parsedFromAccountID },
+      { $inc: { [fromAccountType]: -parsedAmount } }
+    );
+    await db_connect.collection("accounts").updateOne(
+      { accountID: parsedToAccountID },
+      { $inc: { [toAccountType]: parsedAmount } }
+    );
+
+    // Log transactions
+    await db_connect.collection("accounts").updateOne(
+      { accountID: parsedFromAccountID },
+      {
+        $push: {
+          transactionHistory: {
+            type: 'withdraw',
+            account: fromAccountType,
+            amount: parsedAmount,
+            timestamp: new Date().toISOString()
+          }
+        }
       }
+    );
 
-      // Checks if enough money is in from account
-      if (fromAccount[fromAccountType] < Number(amount)) {
-          console.log("Not enough in source account");
-          return res.status(400).json({ message: "Not enough in source account" });
+    await db_connect.collection("accounts").updateOne(
+      { accountID: parsedToAccountID },
+      {
+        $push: {
+          transactionHistory: {
+            type: 'deposit',
+            account: toAccountType,
+            amount: parsedAmount,
+            timestamp: new Date().toISOString()
+          }
+        }
       }
+    );
 
-      // Update account balances
-      await db_connect.collection("accounts").updateOne(
-          { parsedFromAccountID },
-          { $inc: { [fromAccountType]: -Number(amount) } }
-      );
-      await db_connect.collection("accounts").updateOne(
-          { parsedToAccountID },
-          { $inc: { [toAccountType]: Number(amount) } }
-      );
-
-      // const logTransaction = await db_connect.collection("accounts").updateOne(
-      //   { accountID: parsedAccountID },
-      //   {
-      //     $push: {
-      //       transactionHistory: {
-      //         type: transactionType,
-      //         account: account,
-      //         amount: amount,
-      //         timestamp: new Date().toISOString()
-      //       }
-      //     }
-      //   }
-      // );
-
-      res.status(200).json({ message: "Transfer successful" });
+    res.status(200).json({ message: "Transfer successful" });
   } catch (err) {
-      console.log("Transfer error");
-      res.status(500).json({ message: "Transfer Error" });
+    console.log("Transfer error:", err);
+    res.status(500).json({ message: "Transfer Error" });
   }
 });
-
-
 recordRoutes.route("/record/transactionHistory").get(async (req, res) => {
   try {
     let db_connect = dbo.getDb();
