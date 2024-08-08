@@ -25,7 +25,10 @@ export default function AdminSummary () {
           setAccounts(accountsData)
         } else {
           if (response.status === 401) {
-            navigate('/')
+            navigate('/') 
+          }
+          else if(response.status === 404){
+            navigate('/accountSummary')
           } else {
             window.alert('Failed to fetch accounts.')
           }

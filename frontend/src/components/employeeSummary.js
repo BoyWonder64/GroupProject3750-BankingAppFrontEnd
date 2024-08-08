@@ -32,7 +32,11 @@ export default function EmployeeSummary () {
         } else {
           if (response.status === 401) {
             navigate('/')
-          } else {
+          } 
+          else if(response.status === 404){
+            navigate('/accountSummary')
+          }
+          else {
             window.alert('Failed to fetch accounts.')
           }
         }
@@ -134,7 +138,7 @@ export default function EmployeeSummary () {
               className='block w-full mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-opacity-50'
             >
               <option value='savings'>Savings</option>
-              <option value='checking'>Checking</option>
+              <option value='checkings'>Checking</option>
               <option value='investments'>Investments</option>
             </select>
           </label>

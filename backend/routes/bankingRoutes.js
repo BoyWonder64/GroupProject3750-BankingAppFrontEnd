@@ -89,17 +89,23 @@ recordRoutes.route("/record/login").post(async (req, res) => {
     req.session.role = null
 
     const {password} = req.body; //Collect the password from the screen
+    console.log("Password provided: " + password)
     const hashedPassword = hasher.createHash('sha256').update(password).digest('hex'); //hash the collected password
-
+    console.log("Hashed Password: " + hashedPassword)
     let myquery = { username: req.body.username}; 
     const account = await db_connect.collection("accounts").findOne( myquery ); 
 
- if(account.password !== hashedPassword){ //if the password isnt the same
+ if( account === null) { //if the password isnt the same
   console.log("unsuccessfully logged in")
   return res.status(200).send({ message: 'Invalid username or password' });
  }
 
- if(account.password == hashedPassword){ //if its not empty ie if it exists
+ else if(account.password !== hashedPassword || account.password === null){
+  console.log("unsuccessfully logged in")
+  return res.status(200).send({ message: 'Invalid username or password' });
+ }
+
+ if(account.password === hashedPassword){ //if its not empty ie if it exists
    console.log("successfully logged in")
    console.log(account.username, " ", account.role)
    req.session.accountID = account.accountID //create an accountID session
@@ -164,12 +170,11 @@ recordRoutes.route("/record/accountSummary").get(async (req, res) => {
 
 // Handles deposits and withdrawals on the employeeSummary page
 recordRoutes.route("/record/employeeSummary").post(async (req, res) => {
-  const { accountID, transactionType, accountType, amount } = req.body; 
+  const { accountID, transactionType, accountType, amount } = req.body;
   const db_connect = dbo.getDb();
-  const parsedAccountID = Number(accountID); // Ensure accountID is a number
+  const parsedAccountID = Number(accountID);
   const parsedAmount = parseFloat(amount);
 
-  req.session.accountid = accountID
 
   try {
     const account = await db_connect.collection("accounts").findOne({ accountID: parsedAccountID });
@@ -185,56 +190,54 @@ recordRoutes.route("/record/employeeSummary").post(async (req, res) => {
       return res.status(404).json({ message: "Account not found" });
     }
 
-    let updatedValue;
+    let updateResult;
 
     if (transactionType === "deposit") {
-      const increaseValue = Number(amount);
+      const increaseValue = parsedAmount;
 
       if (accountType === "savings") {
-        updatedValue = await db_connect.collection("accounts").updateOne(
-          { accountID: parsedAccountID},
+        updateResult = await db_connect.collection("accounts").updateOne(
+          { accountID: parsedAccountID },
           { $inc: { savings: increaseValue } }
         );
-      } else if (accountType === "checkings"){
-        updatedValue = await db_connect.collection("accounts").updateOne(
+      } else if (accountType === "checkings") {
+        updateResult = await db_connect.collection("accounts").updateOne(
           { accountID: parsedAccountID },
           { $inc: { checkings: increaseValue } }
         );
-      }
-      else if (accountType === "investments") {
-        updatedValue = await db_connect.collection("accounts").updateOne(
+      } else if (accountType === "investments") {
+        updateResult = await db_connect.collection("accounts").updateOne(
           { accountID: parsedAccountID },
           { $inc: { investments: increaseValue } }
         );
       }
-    } //end of Deposit
 
-    else if (transactionType === "withdraw") {
-      let decreaseValue = Number(amount);
-
+    } else if (transactionType === "withdraw") {
+      const decreaseValue = -parsedAmount; 
       if (accountType === "savings") {
-        if (account.savings >= decreaseValue) {
-          updatedValue = await db_connect.collection("accounts").updateOne(
+        if (account.savings >= parsedAmount) {
+          updateResult = await db_connect.collection("accounts").updateOne(
             { accountID: parsedAccountID },
-            { $set: { savings: account.savings - decreaseValue } }
+            { $inc: { savings: decreaseValue } }
           );
         } else {
           return res.status(400).send({ message: 'Insufficient funds in savings' });
         }
-      } else if (accountType === "checkings") {
-        if (account.checkings >= decreaseValue) {
-          updatedValue = await db_connect.collection("accounts").updateOne(
+      } 
+      if (accountType === "checkings") {
+        if (account.checkings >= parsedAmount) {
+          updateResult = await db_connect.collection("accounts").updateOne(
             { accountID: parsedAccountID },
-            { $set: { checkings: account.checkings - decreaseValue } }
+            { $inc: { checkings: decreaseValue } }
           );
         } else {
           return res.status(400).send({ message: 'Insufficient funds in checkings' });
         }
       } else if (accountType === "investments") {
-        if (account.investments >= decreaseValue) {
-          updatedValue = await db_connect.collection("accounts").updateOne(
-            { accountID: parsedAccountID},
-            { $set: { investments: account.investments - decreaseValue } }
+        if (account.investments >= parsedAmount) {
+          updateResult = await db_connect.collection("accounts").updateOne(
+            { accountID: parsedAccountID },
+            { $inc: { investments: decreaseValue } }
           );
         } else {
           return res.status(400).send({ message: 'Insufficient funds in investments' });
@@ -243,8 +246,9 @@ recordRoutes.route("/record/employeeSummary").post(async (req, res) => {
     } else {
       return res.status(400).send({ message: 'Invalid transaction type' });
     }
-  
-    const logTransaction = await db_connect.collection("accounts").updateOne(
+
+    // Log the transaction in the account's transaction history
+    await db_connect.collection("accounts").updateOne(
       { accountID: parsedAccountID },
       {
         $push: {
@@ -258,9 +262,9 @@ recordRoutes.route("/record/employeeSummary").post(async (req, res) => {
       }
     );
 
-    res.status(200).json({ message: "Transaction logged" });
+    res.status(200).json({ message: "Transaction logged successfully" });
   } catch (err) {
-    console.log("Transaction error");
+    console.log("Transaction error:", err);
     res.status(500).json({ message: "Transaction Error" });
   }
 });

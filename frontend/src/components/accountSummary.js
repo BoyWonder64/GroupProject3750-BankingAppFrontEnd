@@ -28,14 +28,14 @@ export default function AccountsInfo () {
           return
         }
         if (response.status === 201) {
-          window.alert('Please login first!')
+          window.alert('Username and Password were incorrectly entered')
           navigate('/')
         }
 
         const accountResponse = await response.json()
         setUser(accountResponse)
       } catch (error) {
-        window.alert('Failed to fetch account information')
+        window.alert('Username and Password were incorrectly entered')
         console.error(error)
       }
     }
